@@ -44,13 +44,22 @@ export default function Categorys() {
             <Text style={styles.maleText}>Male</Text>
           </View>
           <View style={styles.deleteEditView}>
-         <MaterialIcons name="delete" size={35} color="black"/>
+            <MaterialIcons name="delete" size={32} color="red" paddingLeft={9} marginTop={5} />
           </View>
           <View style={styles.deleteEditView}>
-         <MaterialIcons name="edit" size={35} color="black"/>
+            <MaterialIcons name="edit" size={32} color="blue" paddingLeft={10} marginTop={5} />
           </View>
-
-
+        </View>
+        <View style={styles.TextSView}>
+          <View style={styles.maleTextView}>
+            <Text style={styles.maleText}>Male</Text>
+          </View>
+          <View style={styles.deleteEditView}>
+            <MaterialIcons name="delete" size={32} color="red" paddingLeft={9} marginTop={5} />
+          </View>
+          <View style={styles.deleteEditView}>
+            <MaterialIcons name="edit" size={32} color="blue" paddingLeft={10} marginTop={5} />
+          </View>
         </View>
       </View>
 
@@ -129,41 +138,43 @@ const styles = StyleSheet.create({
   SumbitView: {
     width: 410,
     height: 250,
-    shadowOpacity: 0.5,
-    shadowRadius: 2,
-    shadowOffset: {
-      width: 1,
-      height:1
-    },
-    elevation: 1,
+    elevation: 9,
     borderRadius: 10,
     padding: 14,
-    marginTop:100
+    marginTop: 100,
+    backgroundColor: 'white'
   },
   TextSView: {
     width: '100%',
     height: 45,
-    backgroundColor: 'green',
-    borderRadius: 5,
+    // backgroundColor: 'green',
+    borderRadius: 8,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    elevation:1
+    backgroundColor: 'white',
+    elevation: 3,
+    marginBottom:18
   },
   maleTextView: {
     width: 200,
     height: '100%',
-    backgroundColor: 'pink',
+    // backgroundColor: 'pink',
     justifyContent: 'center',
-    borderRadius:8
+    backgroundColor: 'white',
+    borderRadius: 8,
+    elevation: 4
   },
   maleText: {
     color: 'black',
-    fontSize: 16,
-    marginLeft: 13
+    fontSize: 17,
+    marginLeft: 13,
+    fontWeight: '500',
   },
-  deleteEditView : {
-    marginTop:5,
-    marginRight:20
+  deleteEditView: {
+    elevation: 5,
+    backgroundColor: 'white',
+    width: 50,
+    borderRadius: 5
   }
- 
+
 });

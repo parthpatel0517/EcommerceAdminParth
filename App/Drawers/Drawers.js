@@ -13,8 +13,8 @@ export default function Drawers() {
   
     <Drawer.Navigator>
       <Drawer.Screen name="Categorys" component={Categorys} />
-      <Drawer.Screen name="Product" component={Product} />
       <Drawer.Screen name="Subcategory" component={Subcategory} />
+      <Drawer.Screen name="Product" component={Product} />
     </Drawer.Navigator>
    
   )
