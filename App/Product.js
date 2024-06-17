@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Alert, Modal, StyleSheet, Text, Pressable, View, TouchableOpacity } from 'react-native';
 import { TextInput } from 'react-native-gesture-handler';
 import DropDownPicker from 'react-native-dropdown-picker';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+
 
 export default function Product() {
   const [modalVisible, setModalVisible] = useState(false);
@@ -22,7 +24,7 @@ export default function Product() {
   ]);
 
   return (
-    <View style={{ paddingHorizontal: 90, marginTop: 50 }}>
+    <View style={styles.centeredView}>
       <Modal
         isVisible={modalVisible}
         animationType='slide'
@@ -38,10 +40,10 @@ export default function Product() {
               style={{
                 width: 200,
                 position: 'relative',
-                zIndex: 999,
+                zIndex: 1000,
                 paddingHorizontal: 15,
-                marginBottom:23
               }}>
+
               <DropDownPicker
                 open={open}
                 value={value}
@@ -55,7 +57,7 @@ export default function Product() {
             </View>
             <View
               style={{
-                marginTop: 100,
+                marginTop:30,
                 width: 250,
                 position: 'relative',
                 zIndex: 999,
@@ -115,6 +117,31 @@ export default function Product() {
         <Text style={styles.textStyle}>Add Product detail</Text>
       </TouchableOpacity>
 
+      <View style={styles.SumbitView}>
+        <View style={styles.TextSView}>
+          <View style={styles.maleTextView}>
+            <Text style={styles.maleText}>Male</Text>
+          </View>
+          <View style={styles.deleteEditView}>
+            <MaterialIcons name="delete" size={32} color="red" paddingLeft={9} marginTop={5} />
+          </View>
+          <View style={styles.deleteEditView}>
+            <MaterialIcons name="edit" size={32} color="blue" paddingLeft={10} marginTop={5} />
+          </View>
+        </View>
+        <View style={styles.TextSView}>
+          <View style={styles.maleTextView}>
+            <Text style={styles.maleText}>Male</Text>
+          </View>
+          <View style={styles.deleteEditView}>
+            <MaterialIcons name="delete" size={32} color="red" paddingLeft={9} marginTop={5} />
+          </View>
+          <View style={styles.deleteEditView}>
+            <MaterialIcons name="edit" size={32} color="blue" paddingLeft={10} marginTop={5} />
+          </View>
+        </View>
+      </View>
+
     </View>
   )
 }
@@ -168,11 +195,12 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: 'black',
     fontSize: 20,
+    fontWeight:'500'
   },
   input: {
     width: 210,
     backgroundColor: '#FFFFFF',
-    marginTop: 50,
+    marginTop: 40,
     paddingVertical: 10,
     marginBottom: 25,
     paddingLeft: 10,
@@ -193,5 +221,46 @@ const styles = StyleSheet.create({
   },
   descriptionInput:{
     marginTop:10
+  },
+  SumbitView: {
+    width: 410,
+    height: 250,
+    elevation: 9,
+    borderRadius: 10,
+    padding: 14,
+    marginTop: 100,
+    backgroundColor: 'white'
+  },
+  TextSView: {
+    width: '100%',
+    height: 45,
+    // backgroundColor: 'green',
+    borderRadius: 8,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    backgroundColor: 'white',
+    elevation: 3,
+    marginBottom:18
+  },
+  maleTextView: {
+    width: 200,
+    height: '100%',
+    // backgroundColor: 'pink',
+    justifyContent: 'center',
+    backgroundColor: 'white',
+    borderRadius: 8,
+    elevation: 4
+  },
+  maleText: {
+    color: 'black',
+    fontSize: 17,
+    marginLeft: 13,
+    fontWeight: '500',
+  },
+  deleteEditView: {
+    elevation: 5,
+    backgroundColor: 'white',
+    width: 50,
+    borderRadius: 5
   }
 });
