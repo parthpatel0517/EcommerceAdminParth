@@ -4,20 +4,40 @@ import React, { useEffect, useState } from 'react';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ScrollView } from 'react-native-gesture-handler';
+import NetInfo from "@react-native-community/netinfo";
+
 
 export default function Categorys() {
   const [modalVisible, setModalVisible] = useState(false);
-  const [Catname, setName] = useState('');
+  const [name, setName] = useState('');
   const [data, setdata] = useState([]);
-  const [update,setUpdate] = useState(null)
+  const [update, setUpdate] = useState(null)
+  const [isConnected, SetIsConnected] = useState(true);
+  useEffect(()=>{
+    const unsubscribe = NetInfo.addEventListener(state => {
+      SetIsConnected(state.isConnected)
+    });
+    return()=>{
+      unsubscribe()
+    }
+  },[])
 
   useEffect(() => {
     getdata();
-  }, []);
+  }, [isConnected]);
 
   const getdata = async () => {
-    const Cat_data = await AsyncStorage.getItem("category");
-    setdata(JSON.parse(Cat_data));
+    if(isConnected){
+      const response =await fetch("https://dummyjson.com/products/categories")
+      const data = await response.json()
+
+      setdata(data)
+    } else{
+       const Cat_data = await AsyncStorage.getItem("category");
+    if(Cat_data){
+      setdata(JSON.parse(Cat_data));
+    }
+    }    
   }
 
 
@@ -25,39 +45,42 @@ export default function Categorys() {
     setModalVisible(false);
 
     const catData = await AsyncStorage.getItem("category");
-    if(update){
-      const Udata = JSON.parse(catData).map((v)=>{
-        if(v.id===update){
-          return ({id: update , cat_name: Catname})
-        } else{
+
+    //console.log(update, "pppp");
+
+    if (update) {
+      const Udata = JSON.parse(catData).map((v) => {
+        if (v.id === update) {
+          return ({ id: update, name: name })
+        } else {
           return v;
         }
       })
 
       await AsyncStorage.setItem("category", JSON.stringify(Udata))
-      setUpdate(Udata)
-      console.log(Udata);
-    } else{
+      setdata(Udata)
+    //  console.log(Udata);
+    } else {
       if (catData) {
         console.log("fffffff");
         const asyncData = JSON.parse(catData);
-  
-        asyncData.push({ id: Math.floor(Math.random() * 10000), cat_name: Catname })
-  
+
+        asyncData.push({ id: Math.floor(Math.random() * 10000), name: name })
+
         await AsyncStorage.setItem("category", JSON.stringify(asyncData))
         setdata(asyncData)
       } else {
-        let data = [{ id: Math.floor(Math.random() * 10000), cat_name: Catname }];
-  
+        let data = [{ id: Math.floor(Math.random() * 10000), name: name }];
+
         await AsyncStorage.setItem("category", JSON.stringify(data))
         setdata(asyncData)
-      }  
+      }
     }
-   
+
     setName('')
     setUpdate(null)
     // console.log("async", catData);
-    console.log(Catname);
+  //  console.log(name);
   }
 
   const handaldelte = async (id) => {
@@ -79,9 +102,9 @@ export default function Categorys() {
     console.log(fData);
 
 
-    setName(fData.cat_name);
+    setName(fData.name);
 
-    setUpdate(true)
+    setUpdate(id);
   }
 
   return (
@@ -100,10 +123,10 @@ export default function Categorys() {
               onChangeText={setName}
               placeholder='Category Name'
               placeholderTextColor='#9B9B9B'
-              value={Catname}
+              value={name}
             />
             <TouchableOpacity
-              style={[styles.button, styles.buttonClose]}
+              style={[styles.buttonSumbit, styles.buttonClose]}
               onPress={handleSubmit}>
               <Text style={styles.textStyle}>{update ? 'update' : 'Sumbit'}</Text>
             </TouchableOpacity>
@@ -120,17 +143,17 @@ export default function Categorys() {
         {data.map((v, i) => (
           <View key={v.id} style={styles.TextSView}>
             <View style={styles.maleTextView}>
-              <Text style={styles.maleText}>{v.cat_name}</Text>
+              <Text style={styles.maleText}>{v.name}</Text>
             </View>
-    
-              <TouchableOpacity onPress={() => handaldelte(v.id)}  style={styles.deleteEditView}>
-                <MaterialIcons name="delete" size={33} color="red" paddingLeft={8} marginTop={7} />
-              </TouchableOpacity>
 
-              <TouchableOpacity onPress={() => handalEdit(v.id)} style={styles.deleteEditView}>
-                <MaterialIcons name="edit" size={33} color="blue" paddingLeft={10} marginTop={6} />
-              </TouchableOpacity>
-            </View>
+            <TouchableOpacity onPress={() => handaldelte(v.id)} style={styles.deleteEditView}>
+              <MaterialIcons name="delete" size={33} color="red" paddingLeft={8} marginTop={7} />
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={() => handalEdit(v.id)} style={styles.deleteEditView}>
+              <MaterialIcons name="edit" size={33} color="blue" paddingLeft={10} marginTop={6} />
+            </TouchableOpacity>
+          </View>
         ))}
       </View>
 
@@ -142,7 +165,7 @@ const styles = StyleSheet.create({
   centeredView: {
     flex: 1,
     alignItems: 'center',
-    marginTop: 40
+    marginTop: 40,
   },
   modalView: {
     width: 300,
@@ -161,11 +184,22 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   button: {
+    width: 200,
     borderRadius: 35,
     padding: 10,
-    paddingHorizontal: 40,
+    paddingHorizontal: 0,
     elevation: 2,
-    marginTop: 10
+    marginTop: 24,
+    marginLeft: 210
+
+  },
+  buttonSumbit: {
+    width: 200,
+    borderRadius: 35,
+    padding: 10,
+    elevation: 2,
+    marginTop: 24
+
   },
   buttonOpen: {
     backgroundColor: '#F194FF',
@@ -210,7 +244,7 @@ const styles = StyleSheet.create({
     elevation: 9,
     borderRadius: 10,
     padding: 14,
-    marginTop: 60,
+    marginTop: 40,
     backgroundColor: 'white'
   },
   TextSView: {
@@ -228,7 +262,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderRadius: 8,
     elevation: 4,
-    paddingVertical:14
+    paddingVertical: 14
   },
   maleText: {
     color: 'black',
