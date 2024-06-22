@@ -39,8 +39,7 @@ export default function Categorys() {
     }
     }    
   }
-
-
+  
   const handleSubmit = async () => {
     setModalVisible(false);
 

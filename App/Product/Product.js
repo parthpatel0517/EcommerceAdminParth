@@ -43,7 +43,7 @@ export default function Product() {
                 zIndex: 1000,
                 paddingHorizontal: 15,
               }}>
-
+                
               <DropDownPicker
                 open={open}
                 value={value}
