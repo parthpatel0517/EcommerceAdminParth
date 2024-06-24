@@ -2,15 +2,18 @@ import { useFormik } from 'formik';
 import React, { useState } from 'react';
 import { Alert, Modal, StyleSheet, Text, Pressable, View } from 'react-native';
 import { TextInput } from 'react-native-gesture-handler';
-import { object, string, number, date, InferType } from 'yup';
+import { object, string, number, date, InferType, boolean } from 'yup';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { RadioButton } from 'react-native-paper';
-import { CheckBox } from 'react-native-elements';
+// import { CheckBox } from 'react-native-elements';
+import BouncyCheckbox from "react-native-bouncy-checkbox";
+
 
 export default function Validation() {
     const [modalVisible, setModalVisible] = useState(false);
-    const [selectedValue, setSelectedValue] = useState('option1');
+    const [selectedValue, setSelectedValue] = useState('');
     const [isSelected, setSelection] = useState(false);
+    const [selectdrop, setSelectdrop] = useState('')
 
     const [open, setOpen] = useState(false);
     const [value, setValue] = useState(null);
@@ -24,7 +27,10 @@ export default function Validation() {
         email: string().required().email(),
         mobilenumber: string().required().matches(/^\d{10}$/, "Mobile number must be 10 digit"),
         age: number().required().min(18, "Minimum 18 age allowed").typeError("Please enter age in digit"),
-        password: string().required().matches(/^(?=.[A-Za-z])(?=.\d)(?=.[@$!%#?&])[A-Za-z\d@$!%*#?&]{8,}$/, "Password must be 8 combination of alpabet, digit and special symbol.")
+        password: string().required().matches(/^(?=.[A-Za-z])(?=.\d)(?=.[@$!%#?&])[A-Za-z\d@$!%*#?&]{8,}$/, "Password must be 8 combination of alpabet, digit and special symbol."),
+        checkbox: boolean().required("Please select the checkbox").oneOf([true]),
+        radiobutton: boolean().required("Please select at list one").oneOf([true]),
+        dropdown: boolean().required('Please select category').oneOf([true])
     })
 
     const formik = useFormik({
@@ -33,7 +39,10 @@ export default function Validation() {
             age: '',
             email: '',
             mobilenumber: '',
-            password: ''
+            password: '',
+            checkbox: '',
+            radiobutton: '',
+            dropdown: ''
         },
         validationSchema: userSchema,
         onSubmit: values => {
@@ -45,14 +54,6 @@ export default function Validation() {
 
     return (
         <View style={styles.centeredView}>
-            <View style={styles.checkboxContainer}>
-                <CheckBox
-                    checked={isSelected}
-                    onPress={() => setSelection(!isSelected)}
-                    containerStyle={styles.checkbox}
-                />
-                <Text style={styles.label}>Do you like React Native?</Text>
-            </View>
             <Modal
                 animationType="slide"
                 transparent={true}
@@ -63,7 +64,19 @@ export default function Validation() {
                 }}>
                 <View style={styles.centeredView}>
                     <View style={styles.modalView}>
-                       
+                        <BouncyCheckbox
+                            style={{ marginLeft: 100, marginBottom: 10 }}
+                            size={25}
+                            fillColor="red"
+                            unFillColor="#FFFFFF"
+                            text="CheckBox"
+                            iconStyle={{ borderColor: "red" }}
+                            innerIconStyle={{ borderWidth: 2 }}
+                            textStyle={{ fontFamily: "JosefinSans-Regular" }}
+                            onPress={(() => setSelection(!isSelected))}
+                            onChangeText={handleChange('checkbox')}
+                        />
+                        <Text style={{ color: 'red' }}>{isSelected ? '' : errors.checkbox}</Text>
 
                         <View style={styles.radioGroup}>
                             <View style={styles.radioButton}>
@@ -72,11 +85,11 @@ export default function Validation() {
                                     status={selectedValue === 'option1' ?
                                         'checked' : 'unchecked'}
                                     onPress={() => setSelectedValue('option1')}
+                                    onChangeText={handleChange('radiobutton')}
+
                                     color="#007BFF"
                                 />
-                                <Text style={styles.radioLabel}>
-                                    ReactJS
-                                </Text>
+                                <Text style={styles.radioLabel}>ReactJS</Text>
                             </View>
 
                             <View style={styles.radioButton}>
@@ -85,11 +98,10 @@ export default function Validation() {
                                     status={selectedValue === 'option2' ?
                                         'checked' : 'unchecked'}
                                     onPress={() => setSelectedValue('option2')}
+                                    onChangeText={handleChange('radiobutton')}
                                     color="#007BFF"
                                 />
-                                <Text style={styles.radioLabel}>
-                                    NextJs
-                                </Text>
+                                <Text style={styles.radioLabel}>NextJs</Text>
                             </View>
 
                             <View style={styles.radioButton}>
@@ -98,13 +110,14 @@ export default function Validation() {
                                     status={selectedValue === 'option3' ?
                                         'checked' : 'unchecked'}
                                     onPress={() => setSelectedValue('option3')}
+                                    onChangeText={handleChange('radiobutton')}
                                     color="#007BFF"
                                 />
-                                <Text style={styles.radioLabel}>
-                                    React Native
-                                </Text>
+                                <Text style={styles.radioLabel}>React Native</Text>
+
                             </View>
                         </View>
+                        <Text style={{ color: 'red', marginBottom: 20 }}>{selectedValue ? '' : errors.radiobutton}</Text>
 
 
                         <View
@@ -123,23 +136,29 @@ export default function Validation() {
                                 setValue={setValue}
                                 setItems={setItems}
                                 placeholder={'Choose Category.'}
+                                onPress={() => setSelectdrop(!selectdrop)}
+                                onChangeText={handleChange('dropdown')}
                             />
-
+                            <Text style={{ color: 'red', marginBottom: 20 }}>{selectdrop ? '' : errors.dropdown}</Text>
                         </View>
 
 
                         <TextInput
+                        
                             color='red'
                             placeholder='Category name'
                             placeholderTextColor='#9B9B9B'
+                            style={styles.input}
                             onChangeText={handleChange('name')}
                             value={values.name}
                         />
                         <Text style={{ color: 'red' }}>{errors ? errors.name : ''}</Text>
                         <TextInput
+
                             color='red'
                             placeholder='Category age'
                             placeholderTextColor='#9B9B9B'
+                            style={styles.input}
                             onChangeText={handleChange('age')}
                             value={values.age > 18}
                         />
@@ -148,6 +167,7 @@ export default function Validation() {
                             color='red'
                             placeholder='Category email'
                             placeholderTextColor='#9B9B9B'
+                            style={styles.input}
                             onChangeText={handleChange('email')}
                             value={values.email}
                         />
@@ -156,6 +176,7 @@ export default function Validation() {
                             color='red'
                             placeholder='Category mobilenumber'
                             placeholderTextColor='#9B9B9B'
+                            style={styles.input}
                             onChangeText={handleChange('mobilenumber')}
                             value={values.mobilenumber}
                         />
@@ -164,6 +185,7 @@ export default function Validation() {
                             color='red'
                             placeholder='Category password'
                             placeholderTextColor='#9B9B9B'
+                            style={styles.input}
                             onChangeText={handleChange('password')}
                             value={values.password}
                         />
@@ -245,7 +267,7 @@ const styles = StyleSheet.create({
         },
         shadowOpacity: 0.25,
         shadowRadius: 3.84,
-        marginBottom: 20
+        marginBottom: 10
     },
 
     radioButton: {
@@ -269,4 +291,10 @@ const styles = StyleSheet.create({
         margin: 8,
         color: 'black'
     },
+    input: {
+        height: 40,
+        margin: 12,
+        borderWidth: 1,
+        padding: 10,
+      },
 });
