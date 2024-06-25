@@ -1,12 +1,16 @@
 import { useFormik } from 'formik';
-import React, { useState } from 'react';
-import { Alert, Modal, StyleSheet, Text, Pressable, View } from 'react-native';
-import { TextInput } from 'react-native-gesture-handler';
+import React, { useEffect, useState  } from 'react';
+import { Alert, Modal, StyleSheet, Text, Pressable, View, TouchableOpacity } from 'react-native';
+import { ScrollView, TextInput } from 'react-native-gesture-handler';
 import { object, string, number, date, InferType, boolean } from 'yup';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import DropDownPicker from 'react-native-dropdown-picker';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { RadioButton } from 'react-native-paper';
 // import { CheckBox } from 'react-native-elements';
 import BouncyCheckbox from "react-native-bouncy-checkbox";
+import NetInfo from "@react-native-community/netinfo";
+
 
 
 export default function Validation() {
@@ -14,6 +18,36 @@ export default function Validation() {
     const [selectedValue, setSelectedValue] = useState('');
     const [isSelected, setSelection] = useState(false);
     const [selectdrop, setSelectdrop] = useState('')
+    const [name, setName] = useState('');
+    const [data, setdata] = useState([]);
+    const [update, setUpdate] = useState(null)
+    const [isConnected, SetIsConnected] = useState(true);
+    useEffect(()=>{
+      const unsubscribe = NetInfo.addEventListener(state => {
+        SetIsConnected(state.isConnected)
+      });
+      return()=>{
+        unsubscribe()
+      }
+    },[])
+  
+    useEffect(() => {
+      getdata();
+    }, []);
+  
+    const getdata = async () => {
+      if(isConnected){
+        const response =await fetch("https://dummyjson.com/products/categories")
+        const data = await response.json()
+  
+        setdata(data)
+      } else{
+         const Cat_data = await AsyncStorage.getItem("category");
+      if(Cat_data){
+        setdata(JSON.parse(Cat_data));
+      }
+      }    
+    }
 
     const [open, setOpen] = useState(false);
     const [value, setValue] = useState(null);
@@ -27,10 +61,10 @@ export default function Validation() {
         email: string().required().email(),
         mobilenumber: string().required().matches(/^\d{10}$/, "Mobile number must be 10 digit"),
         age: number().required().min(18, "Minimum 18 age allowed").typeError("Please enter age in digit"),
-        password: string().required().matches(/^(?=.[A-Za-z])(?=.\d)(?=.[@$!%#?&])[A-Za-z\d@$!%*#?&]{8,}$/, "Password must be 8 combination of alpabet, digit and special symbol."),
+        password: string().required().matches(/^[a-zA-Z0-9!@#$%^&*]{6,16}$/, "Password must be 8 combination of alpabet, digit and special symbol."),
         checkbox: boolean().required("Please select the checkbox").oneOf([true]),
-        radiobutton: boolean().required("Please select at list one").oneOf([true]),
-        dropdown: boolean().required('Please select category').oneOf([true])
+        radiobutton: string().required("Please select at list one"),
+        dropdown: string().required('Please select category')
     })
 
     const formik = useFormik({
@@ -45,15 +79,77 @@ export default function Validation() {
             dropdown: ''
         },
         validationSchema: userSchema,
-        onSubmit: values => {
+        
+        onSubmit: async (values) => {
             console.log(values);
             setModalVisible(!modalVisible)
+            const catData = await AsyncStorage.getItem("ValidationInfo");
+
+            //console.log(update, "pppp");
+        
+            if (update) {
+              const Udata = JSON.parse(catData).map((v) => {
+                if (v.id === update) {
+                  return ({ id: update, name: values.name,age: values.age })
+                } else {
+                  return v;
+                }
+              })
+        
+              await AsyncStorage.setItem("ValidationInfo", JSON.stringify(Udata))
+              setdata(Udata)
+            //  console.log(Udata);
+            } else {
+              if (catData) {
+                console.log("fffffff");
+                const asyncData = JSON.parse(catData);
+        
+                asyncData.push({ id: Math.floor(Math.random() * 10000), name: values.name,age: values.age })
+        
+                await AsyncStorage.setItem("ValidationInfo", JSON.stringify(asyncData))
+                setdata(asyncData)
+              } else {
+                let data = [{ id: Math.floor(Math.random() * 10000), name: values.name ,age: values.age}];
+        
+                await AsyncStorage.setItem("ValidationInfo", JSON.stringify(data))
+                setdata(asyncData)
+              }
+            }
+        
+            setName('')
+            setUpdate(null)
         },
+        
     });
-    const { handleChange, errors, values, handleSubmit } = formik
+    const { handleChange, errors, values, handleSubmit, setFieldValue } = formik
+
+    const handaldelte = async (id) => {
+        const data = await AsyncStorage.getItem("ValidationInfo");
+        const fData = JSON.parse(data).filter((v) => v.id !== id);
+    
+        await AsyncStorage.setItem("ValidationInfo", JSON.stringify(fData));
+    
+        setdata(fData);
+      }
+      const handalEdit = async (id) => {
+        console.log(id);
+    
+        setModalVisible(true)
+    
+        const data = await AsyncStorage.getItem("ValidationInfo");
+        const fData = JSON.parse(data).find((v) => v.id === id);
+    
+        console.log(fData);
+    
+    
+        setName(fData.name);
+    
+        setUpdate(id);
+      }
 
     return (
-        <View style={styles.centeredView}>
+        <ScrollView>
+           <View  style={styles.centeredView}>
             <Modal
                 animationType="slide"
                 transparent={true}
@@ -73,7 +169,7 @@ export default function Validation() {
                             iconStyle={{ borderColor: "red" }}
                             innerIconStyle={{ borderWidth: 2 }}
                             textStyle={{ fontFamily: "JosefinSans-Regular" }}
-                            onPress={(() => setSelection(!isSelected))}
+                            onPress={() => { setSelection(!isSelected); setFieldValue('checkbox', !isSelected) }}
                             onChangeText={handleChange('checkbox')}
                         />
                         <Text style={{ color: 'red' }}>{isSelected ? '' : errors.checkbox}</Text>
@@ -84,7 +180,7 @@ export default function Validation() {
                                     value="option1"
                                     status={selectedValue === 'option1' ?
                                         'checked' : 'unchecked'}
-                                    onPress={() => setSelectedValue('option1')}
+                                    onPress={() => { setSelectedValue('option1'); setFieldValue('radiobutton', 'ReactJS') }}
                                     onChangeText={handleChange('radiobutton')}
 
                                     color="#007BFF"
@@ -97,7 +193,7 @@ export default function Validation() {
                                     value="option2"
                                     status={selectedValue === 'option2' ?
                                         'checked' : 'unchecked'}
-                                    onPress={() => setSelectedValue('option2')}
+                                    onPress={() => { setSelectedValue('option2'); setFieldValue('radiobutton', 'NextJs') }}
                                     onChangeText={handleChange('radiobutton')}
                                     color="#007BFF"
                                 />
@@ -109,7 +205,7 @@ export default function Validation() {
                                     value="option3"
                                     status={selectedValue === 'option3' ?
                                         'checked' : 'unchecked'}
-                                    onPress={() => setSelectedValue('option3')}
+                                    onPress={() => { setSelectedValue('option3'); setFieldValue('radiobutton', 'React Native') }}
                                     onChangeText={handleChange('radiobutton')}
                                     color="#007BFF"
                                 />
@@ -138,13 +234,14 @@ export default function Validation() {
                                 placeholder={'Choose Category.'}
                                 onPress={() => setSelectdrop(!selectdrop)}
                                 onChangeText={handleChange('dropdown')}
+                                onSelectItem={(items) => setFieldValue('dropdown', items.value)}
                             />
                             <Text style={{ color: 'red', marginBottom: 20 }}>{selectdrop ? '' : errors.dropdown}</Text>
                         </View>
 
 
                         <TextInput
-                        
+
                             color='red'
                             placeholder='Category name'
                             placeholderTextColor='#9B9B9B'
@@ -191,20 +288,39 @@ export default function Validation() {
                         />
                         <Text style={{ color: 'red' }}>{errors ? errors.password : ''}</Text>
 
-                        <Pressable
-                            style={[styles.button, styles.buttonClose]}
-                            onPress={() => handleSubmit()}>
-                            <Text style={styles.textStyle}>Hide Modal</Text>
-                        </Pressable>
+                        <TouchableOpacity
+                            style={[styles.button1, styles.buttonClose]}
+                            onPress={() => handleSubmit() }>
+                            <Text style={styles.textStyle}>Sumbit</Text>
+                        </TouchableOpacity>
                     </View>
                 </View>
             </Modal>
-            <Pressable
+            <TouchableOpacity
                 style={[styles.button, styles.buttonOpen]}
                 onPress={() => setModalVisible(true)}>
                 <Text style={styles.textStyle}>Show Modal</Text>
-            </Pressable>
-        </View>
+            </TouchableOpacity>
+
+            <View style={styles.SumbitView}>
+                {data.map((v, i) => (
+                    <View key={v.id} style={styles.TextSView}>
+                        <View style={styles.maleTextView}>
+                            <Text style={styles.maleText}>{v.name}</Text>
+                        </View>
+
+                        <TouchableOpacity onPress={() => handaldelte(v.id)} style={styles.deleteEditView}>
+                            <MaterialIcons name="delete" size={33} color="red" paddingLeft={8} marginTop={7} />
+                        </TouchableOpacity>
+
+                        <TouchableOpacity onPress={() => handalEdit(v.id)} style={styles.deleteEditView}>
+                            <MaterialIcons name="edit" size={33} color="blue" paddingLeft={10} marginTop={6} />
+                        </TouchableOpacity>
+                    </View>
+                ))}
+            </View>
+            </View>
+       </ScrollView>
     );
 };
 
@@ -216,7 +332,8 @@ const styles = StyleSheet.create({
         marginTop: 22,
     },
     modalView: {
-        margin: 20,
+        margin: 26,
+        marginTop: 60,
         backgroundColor: 'white',
         borderRadius: 20,
         padding: 35,
@@ -231,9 +348,19 @@ const styles = StyleSheet.create({
         elevation: 5,
     },
     button: {
+        borderRadius: 50,
+        paddingVertical: 15,
+        elevation: 2,
+        position: 'absolute',
+        top: 0,
+        paddingHorizontal: 90
+    },
+    button1: {
         borderRadius: 20,
         padding: 10,
         elevation: 2,
+        paddingHorizontal: 30,
+        marginTop: 20
     },
     buttonOpen: {
         backgroundColor: '#F194FF',
@@ -245,6 +372,7 @@ const styles = StyleSheet.create({
         color: 'white',
         fontWeight: 'bold',
         textAlign: 'center',
+        fontSize: 16
     },
     modalText: {
         marginBottom: 15,
@@ -296,5 +424,41 @@ const styles = StyleSheet.create({
         margin: 12,
         borderWidth: 1,
         padding: 10,
-      },
+    },
+    SumbitView: {
+        elevation: 9,
+        borderRadius: 10,
+        padding: 14,
+        marginTop: 100,
+        backgroundColor: 'white'
+    },
+    TextSView: {
+        width: '100%',
+        borderRadius: 8,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        backgroundColor: 'white',
+        elevation: 3,
+        marginBottom: 18
+    },
+    maleTextView: {
+        width: 220,
+        justifyContent: 'center',
+        backgroundColor: 'white',
+        borderRadius: 8,
+        elevation: 4,
+        paddingVertical: 14
+    },
+    maleText: {
+        color: 'black',
+        fontSize: 17,
+        marginLeft: 13,
+        fontWeight: '500',
+    },
+    deleteEditView: {
+        elevation: 5,
+        backgroundColor: 'white',
+        width: 50,
+        borderRadius: 5,
+    }
 });
