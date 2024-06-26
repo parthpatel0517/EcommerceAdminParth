@@ -1,5 +1,5 @@
 import { useFormik } from 'formik';
-import React, { useEffect, useState  } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Alert, Modal, StyleSheet, Text, Pressable, View, TouchableOpacity } from 'react-native';
 import { ScrollView, TextInput } from 'react-native-gesture-handler';
 import { object, string, number, date, InferType, boolean } from 'yup';
@@ -22,31 +22,31 @@ export default function Validation() {
     const [data, setdata] = useState([]);
     const [update, setUpdate] = useState(null)
     const [isConnected, SetIsConnected] = useState(true);
-    useEffect(()=>{
-      const unsubscribe = NetInfo.addEventListener(state => {
-        SetIsConnected(state.isConnected)
-      });
-      return()=>{
-        unsubscribe()
-      }
-    },[])
-  
     useEffect(() => {
-      getdata();
+        const unsubscribe = NetInfo.addEventListener(state => {
+            SetIsConnected(state.isConnected)
+        });
+        return () => {
+            unsubscribe()
+        }
+    }, [])
+
+    useEffect(() => {
+        getdata();
     }, []);
-  
+
     const getdata = async () => {
-      if(isConnected){
-        const response =await fetch("https://dummyjson.com/products/categories")
-        const data = await response.json()
-  
-        setdata(data)
-      } else{
-         const Cat_data = await AsyncStorage.getItem("category");
-      if(Cat_data){
-        setdata(JSON.parse(Cat_data));
-      }
-      }    
+        if (isConnected) {
+            const response = await fetch("https://dummyjson.com/products/categories")
+            const data = await response.json()
+
+            setdata(data)
+        } else {
+            const Cat_data = await AsyncStorage.getItem("category");
+            if (Cat_data) {
+                setdata(JSON.parse(Cat_data));
+            }
+        }
     }
 
     const [open, setOpen] = useState(false);
@@ -79,248 +79,240 @@ export default function Validation() {
             dropdown: ''
         },
         validationSchema: userSchema,
-        
-        onSubmit: async (values) => {
+
+        onSubmit: async (values,{resetForm}) => {
             console.log(values);
             setModalVisible(!modalVisible)
             const catData = await AsyncStorage.getItem("ValidationInfo");
 
             //console.log(update, "pppp");
-        
+
             if (update) {
-              const Udata = JSON.parse(catData).map((v) => {
-                if (v.id === update) {
-                  return ({ id: update, name: values.name,age: values.age })
-                } else {
-                  return v;
-                }
-              })
-        
-              await AsyncStorage.setItem("ValidationInfo", JSON.stringify(Udata))
-              setdata(Udata)
-            //  console.log(Udata);
+                const Udata = JSON.parse(catData).map((v) => {
+                    if (v.id === update) {
+                        return ({ id: update, name: values.name, age: values.age })
+                    } else {
+                        return v;
+                    }
+                })
+
+                await AsyncStorage.setItem("ValidationInfo", JSON.stringify(Udata))
+                setdata(Udata)
+                //  console.log(Udata);
             } else {
-              if (catData) {
-                console.log("fffffff");
-                const asyncData = JSON.parse(catData);
-        
-                asyncData.push({ id: Math.floor(Math.random() * 10000), name: values.name,age: values.age })
-        
-                await AsyncStorage.setItem("ValidationInfo", JSON.stringify(asyncData))
-                setdata(asyncData)
-              } else {
-                let data = [{ id: Math.floor(Math.random() * 10000), name: values.name ,age: values.age}];
-        
-                await AsyncStorage.setItem("ValidationInfo", JSON.stringify(data))
-                setdata(asyncData)
-              }
+                if (catData) {
+                    console.log("fffffff");
+                    const asyncData = JSON.parse(catData);
+
+                    asyncData.push({ id: Math.floor(Math.random() * 10000), name: values.name, age: values.age })
+
+                    await AsyncStorage.setItem("ValidationInfo", JSON.stringify(asyncData))
+                    setdata(asyncData)
+                } else {
+                    let data = [{ id: Math.floor(Math.random() * 10000), name: values.name, age: values.age }];
+
+                    await AsyncStorage.setItem("ValidationInfo", JSON.stringify(data))
+                    setdata(asyncData)
+                }
             }
-        
+
             setName('')
+            setAge('')
             setUpdate(null)
+            resetForm()
         },
-        
+
     });
-    const { handleChange, errors, values, handleSubmit, setFieldValue } = formik
+    const { handleChange, errors, values, handleSubmit, setFieldValue ,setValues} = formik
 
     const handaldelte = async (id) => {
         const data = await AsyncStorage.getItem("ValidationInfo");
         const fData = JSON.parse(data).filter((v) => v.id !== id);
-    
+
         await AsyncStorage.setItem("ValidationInfo", JSON.stringify(fData));
-    
+
         setdata(fData);
-      }
-      const handalEdit = async (id) => {
-        console.log(id);
-    
-        setModalVisible(true)
-    
-        const data = await AsyncStorage.getItem("ValidationInfo");
-        const fData = JSON.parse(data).find((v) => v.id === id);
-    
-        console.log(fData);
-    
-    
-        setName(fData.name);
-    
-        setUpdate(id);
-      }
+    }
+    const handalEdit = async (data) => {
+        setModalVisible(true);
+        setValues(data);
+        setUpdate(data);
+    }
 
     return (
         <ScrollView>
-           <View  style={styles.centeredView}>
-            <Modal
-                animationType="slide"
-                transparent={true}
-                visible={modalVisible}
-                onRequestClose={() => {
-                    Alert.alert('Modal has been closed.');
-                    setModalVisible(!modalVisible);
-                }}>
-                <View style={styles.centeredView}>
-                    <View style={styles.modalView}>
-                        <BouncyCheckbox
-                            style={{ marginLeft: 100, marginBottom: 10 }}
-                            size={25}
-                            fillColor="red"
-                            unFillColor="#FFFFFF"
-                            text="CheckBox"
-                            iconStyle={{ borderColor: "red" }}
-                            innerIconStyle={{ borderWidth: 2 }}
-                            textStyle={{ fontFamily: "JosefinSans-Regular" }}
-                            onPress={() => { setSelection(!isSelected); setFieldValue('checkbox', !isSelected) }}
-                            onChangeText={handleChange('checkbox')}
-                        />
-                        <Text style={{ color: 'red' }}>{isSelected ? '' : errors.checkbox}</Text>
-
-                        <View style={styles.radioGroup}>
-                            <View style={styles.radioButton}>
-                                <RadioButton.Android
-                                    value="option1"
-                                    status={selectedValue === 'option1' ?
-                                        'checked' : 'unchecked'}
-                                    onPress={() => { setSelectedValue('option1'); setFieldValue('radiobutton', 'ReactJS') }}
-                                    onChangeText={handleChange('radiobutton')}
-
-                                    color="#007BFF"
-                                />
-                                <Text style={styles.radioLabel}>ReactJS</Text>
-                            </View>
-
-                            <View style={styles.radioButton}>
-                                <RadioButton.Android
-                                    value="option2"
-                                    status={selectedValue === 'option2' ?
-                                        'checked' : 'unchecked'}
-                                    onPress={() => { setSelectedValue('option2'); setFieldValue('radiobutton', 'NextJs') }}
-                                    onChangeText={handleChange('radiobutton')}
-                                    color="#007BFF"
-                                />
-                                <Text style={styles.radioLabel}>NextJs</Text>
-                            </View>
-
-                            <View style={styles.radioButton}>
-                                <RadioButton.Android
-                                    value="option3"
-                                    status={selectedValue === 'option3' ?
-                                        'checked' : 'unchecked'}
-                                    onPress={() => { setSelectedValue('option3'); setFieldValue('radiobutton', 'React Native') }}
-                                    onChangeText={handleChange('radiobutton')}
-                                    color="#007BFF"
-                                />
-                                <Text style={styles.radioLabel}>React Native</Text>
-
-                            </View>
-                        </View>
-                        <Text style={{ color: 'red', marginBottom: 20 }}>{selectedValue ? '' : errors.radiobutton}</Text>
-
-
-                        <View
-                            style={{
-                                width: 200,
-                                position: 'relative',
-                                zIndex: 1000,
-                                paddingHorizontal: 15,
-                            }}>
-
-                            <DropDownPicker
-                                open={open}
-                                value={value}
-                                items={items}
-                                setOpen={setOpen}
-                                setValue={setValue}
-                                setItems={setItems}
-                                placeholder={'Choose Category.'}
-                                onPress={() => setSelectdrop(!selectdrop)}
-                                onChangeText={handleChange('dropdown')}
-                                onSelectItem={(items) => setFieldValue('dropdown', items.value)}
+            <View style={styles.centeredView}>
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={modalVisible}
+                    onRequestClose={() => {
+                        Alert.alert('Modal has been closed.');
+                        setModalVisible(!modalVisible);
+                    }}>
+                    <View style={styles.centeredView}>
+                        <View style={styles.modalView}>
+                            <BouncyCheckbox 
+                                style={{ marginLeft: 100, marginBottom: 10 }}
+                                size={25}
+                                fillColor="red"
+                                unFillColor="#FFFFFF"
+                                text="CheckBox"
+                                iconStyle={{ borderColor: "red" }}
+                                innerIconStyle={{ borderWidth: 2 }}
+                                textStyle={{ fontFamily: "JosefinSans-Regular" }}
+                                onPress={() => { setSelection(!isSelected); setFieldValue('checkbox', !isSelected) }}
+                                onChangeText={handleChange('checkbox')}
                             />
-                            <Text style={{ color: 'red', marginBottom: 20 }}>{selectdrop ? '' : errors.dropdown}</Text>
+                            <Text style={{ color: 'red' }}>{isSelected ? '' : errors.checkbox}</Text>
+
+                            <View style={styles.radioGroup}>
+                                <View style={styles.radioButton}>
+                                    <RadioButton.Android
+                                        value="option1"
+                                        status={selectedValue === 'option1' ?
+                                            'checked' : 'unchecked'}
+                                        onPress={() => { setSelectedValue('option1'); setFieldValue('radiobutton', 'ReactJS') }}
+                                        onChangeText={handleChange('radiobutton')}
+
+                                        color="#007BFF"
+                                    />
+                                    <Text style={styles.radioLabel}>ReactJS</Text>
+                                </View>
+
+                                <View style={styles.radioButton}>
+                                    <RadioButton.Android
+                                        value="option2"
+                                        status={selectedValue === 'option2' ?
+                                            'checked' : 'unchecked'}
+                                        onPress={() => { setSelectedValue('option2'); setFieldValue('radiobutton', 'NextJs') }}
+                                        onChangeText={handleChange('radiobutton')}
+                                        color="#007BFF"
+                                    />
+                                    <Text style={styles.radioLabel}>NextJs</Text>
+                                </View>
+
+                                <View style={styles.radioButton}>
+                                    <RadioButton.Android
+                                        value="option3"
+                                        status={selectedValue === 'option3' ?
+                                            'checked' : 'unchecked'}
+                                        onPress={() => { setSelectedValue('option3'); setFieldValue('radiobutton', 'React Native') }}
+                                        onChangeText={handleChange('radiobutton')}
+                                        color="#007BFF"
+                                    />
+                                    <Text style={styles.radioLabel}>React Native</Text>
+
+                                </View>
+                            </View>
+                            <Text style={{ color: 'red', marginBottom: 20 }}>{selectedValue ? '' : errors.radiobutton}</Text>
+                            
+                            <View
+                                style={{
+                                    width: 200,
+                                    position: 'relative',
+                                    zIndex: 1000,
+                                    paddingHorizontal: 15,
+                                }}>
+
+                                <DropDownPicker
+                                    open={open}
+                                    value={value}
+                                    items={items}
+                                    setOpen={setOpen}
+                                    setValue={setValue}
+                                    setItems={setItems}
+                                    placeholder={'Choose Category.'}
+                                    onPress={() => setSelectdrop(!selectdrop)}
+                                    onChangeText={handleChange('dropdown')}
+                                    onSelectItem={(items) => setFieldValue('dropdown', items.value)}
+                                />
+                                <Text style={{ color: 'red', marginBottom: 20 }}>{selectdrop ? '' : errors.dropdown}</Text>
+                            </View>
+
+
+                            <TextInput
+
+                                color='red'
+                                placeholder='Category name'
+                                placeholderTextColor='#9B9B9B'
+                                style={styles.input}
+                                onChangeText={handleChange('name')}
+                                value={values.name}
+                            />
+                            <Text style={{ color: 'red' }}>{errors.name ? errors.name : ''}</Text>
+                            <TextInput
+
+                                color='red'
+                                placeholder='Category age'
+                                placeholderTextColor='#9B9B9B'
+                                style={styles.input}
+                                onChangeText={handleChange('age')}
+                                value={values.age > 18}
+                            />
+                            <Text style={{ color: 'red' }}>{errors.age ? errors.age : ''}</Text>
+                            <TextInput
+                                color='red'
+                                placeholder='Category email'
+                                placeholderTextColor='#9B9B9B'
+                                style={styles.input}
+                                onChangeText={handleChange('email')}
+                                value={values.email}
+                            />
+                            <Text style={{ color: 'red' }}>{errors.email ? errors.email : ''}</Text>
+                            <TextInput
+                                color='red'
+                                placeholder='Category mobilenumber'
+                                placeholderTextColor='#9B9B9B'
+                                style={styles.input}
+                                onChangeText={handleChange('mobilenumber')}
+                                value={values.mobilenumber}
+                            />
+                            <Text style={{ color: 'red' }}>{errors.mobilenumber ? errors.mobilenumber : ''}</Text>
+                            <TextInput
+                                color='red'
+                                placeholder='Category password'
+                                placeholderTextColor='#9B9B9B'
+                                style={styles.input}
+                                onChangeText={handleChange('password')}
+                                value={values.password}
+                            />
+                            <Text style={{ color: 'red' }}>{errors.password ? errors.password : ''}</Text>
+
+                            <TouchableOpacity
+                                style={[styles.button1, styles.buttonClose]}
+                                onPress={() => handleSubmit()}>
+                                <Text style={styles.textStyle}>Sumbit</Text>
+                            </TouchableOpacity>
                         </View>
-
-
-                        <TextInput
-
-                            color='red'
-                            placeholder='Category name'
-                            placeholderTextColor='#9B9B9B'
-                            style={styles.input}
-                            onChangeText={handleChange('name')}
-                            value={values.name}
-                        />
-                        <Text style={{ color: 'red' }}>{errors ? errors.name : ''}</Text>
-                        <TextInput
-
-                            color='red'
-                            placeholder='Category age'
-                            placeholderTextColor='#9B9B9B'
-                            style={styles.input}
-                            onChangeText={handleChange('age')}
-                            value={values.age > 18}
-                        />
-                        <Text style={{ color: 'red' }}>{errors ? errors.age : ''}</Text>
-                        <TextInput
-                            color='red'
-                            placeholder='Category email'
-                            placeholderTextColor='#9B9B9B'
-                            style={styles.input}
-                            onChangeText={handleChange('email')}
-                            value={values.email}
-                        />
-                        <Text style={{ color: 'red' }}>{errors ? errors.email : ''}</Text>
-                        <TextInput
-                            color='red'
-                            placeholder='Category mobilenumber'
-                            placeholderTextColor='#9B9B9B'
-                            style={styles.input}
-                            onChangeText={handleChange('mobilenumber')}
-                            value={values.mobilenumber}
-                        />
-                        <Text style={{ color: 'red' }}>{errors ? errors.mobilenumber : ''}</Text>
-                        <TextInput
-                            color='red'
-                            placeholder='Category password'
-                            placeholderTextColor='#9B9B9B'
-                            style={styles.input}
-                            onChangeText={handleChange('password')}
-                            value={values.password}
-                        />
-                        <Text style={{ color: 'red' }}>{errors ? errors.password : ''}</Text>
-
-                        <TouchableOpacity
-                            style={[styles.button1, styles.buttonClose]}
-                            onPress={() => handleSubmit() }>
-                            <Text style={styles.textStyle}>Sumbit</Text>
-                        </TouchableOpacity>
                     </View>
+                </Modal>
+                <TouchableOpacity
+                    style={[styles.button, styles.buttonOpen]}
+                    onPress={() => setModalVisible(true)}>
+                    <Text style={styles.textStyle}>Show Modal</Text>
+                </TouchableOpacity>
+
+                <View style={styles.SumbitView}>
+                    {data.map((v, i) => (
+                        <View key={v.id} style={styles.TextSView}>
+                            <View style={styles.maleTextView}>
+                                <Text style={styles.maleText}>Name: {v.name}</Text>
+                                {/* <Text style={styles.age}>age: {v.age}</Text> */}
+                            </View>
+
+                            <TouchableOpacity onPress={() => handaldelte(v.id)} style={styles.deleteEditView}>
+                                <MaterialIcons name="delete" size={33} color="red" paddingLeft={8} marginTop={7} />
+                            </TouchableOpacity>
+
+                            <TouchableOpacity onPress={() => handalEdit(v)} style={styles.deleteEditView}>
+                                <MaterialIcons name="edit" size={33} color="blue" paddingLeft={10} marginTop={6} />
+                            </TouchableOpacity>
+                        </View>
+                    ))}
                 </View>
-            </Modal>
-            <TouchableOpacity
-                style={[styles.button, styles.buttonOpen]}
-                onPress={() => setModalVisible(true)}>
-                <Text style={styles.textStyle}>Show Modal</Text>
-            </TouchableOpacity>
-
-            <View style={styles.SumbitView}>
-                {data.map((v, i) => (
-                    <View key={v.id} style={styles.TextSView}>
-                        <View style={styles.maleTextView}>
-                            <Text style={styles.maleText}>{v.name}</Text>
-                        </View>
-
-                        <TouchableOpacity onPress={() => handaldelte(v.id)} style={styles.deleteEditView}>
-                            <MaterialIcons name="delete" size={33} color="red" paddingLeft={8} marginTop={7} />
-                        </TouchableOpacity>
-
-                        <TouchableOpacity onPress={() => handalEdit(v.id)} style={styles.deleteEditView}>
-                            <MaterialIcons name="edit" size={33} color="blue" paddingLeft={10} marginTop={6} />
-                        </TouchableOpacity>
-                    </View>
-                ))}
             </View>
-            </View>
-       </ScrollView>
+        </ScrollView>
     );
 };
 
@@ -442,12 +434,14 @@ const styles = StyleSheet.create({
         marginBottom: 18
     },
     maleTextView: {
-        width: 220,
+        width: 270,
+        paddingVertical: 200,
         justifyContent: 'center',
         backgroundColor: 'white',
         borderRadius: 8,
         elevation: 4,
-        paddingVertical: 14
+        paddingVertical: 14,
+        flexDirection: 'row'
     },
     maleText: {
         color: 'black',
@@ -460,5 +454,11 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
         width: 50,
         borderRadius: 5,
+    },
+    age: {
+        color: 'black',
+        fontSize: 17,
+        marginLeft: 13,
+        fontWeight: '500',
     }
 });
