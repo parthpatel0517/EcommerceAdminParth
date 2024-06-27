@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "806180168566",
+    "project_id": "ecommerceadminparth",
+    "storage_bucket": "ecommerceadminparth.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:806180168566:android:80a3b25b610f94a4681057",
+        "android_client_info": {
+          "package_name": "com.ecommerceparth"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAkoL-5aZOUVPiIQhzUuOsWKGVq31VJwCM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

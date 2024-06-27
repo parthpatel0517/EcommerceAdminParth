@@ -22,31 +22,31 @@ export default function Validation() {
     const [data, setdata] = useState([]);
     const [update, setUpdate] = useState(null)
     const [isConnected, SetIsConnected] = useState(true);
-    useEffect(() => {
-        const unsubscribe = NetInfo.addEventListener(state => {
-            SetIsConnected(state.isConnected)
-        });
-        return () => {
-            unsubscribe()
-        }
-    }, [])
+    // useEffect(() => {
+    //     const unsubscribe = NetInfo.addEventListener(state => {
+    //         SetIsConnected(state.isConnected)
+    //     });
+    //     return () => {
+    //         unsubscribe()
+    //     }
+    // }, [])
 
     useEffect(() => {
         getdata();
-    }, []);
+    }, [isConnected]);
 
     const getdata = async () => {
-        if (isConnected) {
-            const response = await fetch("https://dummyjson.com/products/categories")
-            const data = await response.json()
+        // if (isConnected) {
+        //     const response = await fetch("https://dummyjson.com/products/categories")
+        //     const data = await response.json()
 
-            setdata(data)
-        } else {
+        //     setdata(data)
+        // } else {
             const Cat_data = await AsyncStorage.getItem("category");
             if (Cat_data) {
                 setdata(JSON.parse(Cat_data));
             }
-        }
+        // }
     }
 
     const [open, setOpen] = useState(false);
@@ -80,7 +80,7 @@ export default function Validation() {
         },
         validationSchema: userSchema,
 
-        onSubmit: async (values,{resetForm}) => {
+        onSubmit: async (values) => {
             console.log(values);
             setModalVisible(!modalVisible)
             const catData = await AsyncStorage.getItem("ValidationInfo");
@@ -117,9 +117,8 @@ export default function Validation() {
             }
 
             setName('')
-            setAge('')
             setUpdate(null)
-            resetForm()
+            formik.resetForm()
         },
 
     });
