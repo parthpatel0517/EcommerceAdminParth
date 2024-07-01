@@ -135,7 +135,7 @@ export default function Validation() {
     const handalEdit = async (data) => {
         setModalVisible(true);
         setValues(data);
-        setUpdate(data);
+        setUpdate(data.id);
     }
 
     return (

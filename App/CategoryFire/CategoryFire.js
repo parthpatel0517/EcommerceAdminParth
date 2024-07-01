@@ -37,18 +37,29 @@ export default function CategoryFire() {
     }
 
     const handleSubmit1 = async (data) => {
-        console.log('FFfffffff', data);
         setModalVisible(false)
-        await firestore()
-            .collection('Category')
-            .add(data)
-            .then(() => {
-                console.log('Category added!');
-            })
-            .catch((errors) => console.log(errors))
+        if (update) {
+          await firestore()
+                .collection('Category')
+                .doc(update)
+                .set(data)
+                .then(() => {
+                    console.log('User added!');
+                });
+                console.log("Sssss",data);
+        } else {
+            await firestore()
+                .collection('Category')
+                .add(data)
+                .then(() => {
+                    console.log('Category added!');
+                })
+                .catch((errors) => console.log(errors))
+        }
+        getdata();
+        setUpdate(null)
+
     }
-
-
 
     let userSchema = object({
         name: string().required(),
@@ -59,20 +70,29 @@ export default function CategoryFire() {
             name: ''
         },
         validationSchema: userSchema,
-        onSubmit: values => {
+        onSubmit: (values, { resetForm }) => {
             handleSubmit1(values)
+            resetForm();
         },
     });
     const handaldelte = async (id) => {
-        await firestore().collection('Category').doc(id).delete();
-        console.log('Category deleted!');
+        await firestore()
+            .collection('Category')
+            .doc(id)
+            .delete()
+            .then(() => {
+                console.log('User deleted!');
+            });
         getdata();
     }
-    const handalEdit = async (id) => {
 
+    const { handleChange, errors, values, handleSubmit, handleBlur, touched, setValues } = formik
+
+    const handalEdit = async (data) => {
+        setModalVisible(true)
+        setValues(data)
+        setUpdate(data.id)
     }
-    const { handleChange, errors, values, handleSubmit, handleBlur, touched } = formik
-
     return (
         <ScrollView>
             <Modal
@@ -109,7 +129,7 @@ export default function CategoryFire() {
 
             <View style={styles.SumbitView}>
                 {data.map((v, i) => (
-                    <View key={v.id} style={styles.TextSView}>
+                    <View key={i} style={styles.TextSView}>
                         <View style={styles.maleTextView}>
                             <Text style={styles.maleText}>{v.name}</Text>
                         </View>
@@ -118,7 +138,7 @@ export default function CategoryFire() {
                             <MaterialIcons name="delete" size={33} color="red" paddingLeft={8} marginTop={7} />
                         </TouchableOpacity>
 
-                        <TouchableOpacity onPress={() => handalEdit(v.id)} style={styles.deleteEditView}>
+                        <TouchableOpacity onPress={() => handalEdit(v)} style={styles.deleteEditView}>
                             <MaterialIcons name="edit" size={33} color="blue" paddingLeft={10} marginTop={6} />
                         </TouchableOpacity>
                     </View>
