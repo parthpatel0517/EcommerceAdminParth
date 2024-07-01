@@ -11,6 +11,7 @@ export default function Subcategory() {
   const [modalVisible, setModalVisible] = useState(false);
   const [data, setdata] = useState([]);
   const [update, setUpdate] = useState(null)
+  const [selectdrop, setSelectdrop] = useState('')
 
 
   const [open, setOpen] = useState(false);
@@ -33,31 +34,72 @@ export default function Subcategory() {
           categoryData.push({ id: documentSnapshot.id, ...documentSnapshot.data() });
         });
       });
+
+      const subCategoryData = [];
+      const subCategoryDetail = await firestore()
+        .collection('SubCategory')
+        .get()
+        .then(querySnapshot => {
+          querySnapshot.forEach(documentSnapshot => {
+            subCategoryData.push({ id: documentSnapshot.id, ...documentSnapshot.data() });
+          });
+        });
+  
+
     setdata(categoryData);
+    setdata(subCategoryData);
     setItems(categoryData.map(v => ({ label: v.name, value: v.name })));
   }
 
+  const handalSumbit = async (data) => {
+    await firestore()
+      .collection('SubCategory')
+      .add(data)
+      .then(() => {
+        console.log('SubCategory added!');
+      })
+      .catch((errors) => console.log(errors))
+
+    getdata();
+  }
+  const handaldelte = async (id) => {
+    await firestore()
+        .collection('SubCategory')
+        .doc(id)
+        .delete()
+        .then(() => {
+            console.log('User deleted!');
+        });
+    getdata();
+}
+
+
   let userSchema = object({
-    name: string().required(),
+    name: string().required().matches(/^[a-zA-Z ]+$/, "Please enter valid name"),
+    dropdown: string().required('Please select category')
   });
 
   const formik = useFormik({
     initialValues: {
-      name: ''
+      name: '',
+      dropdown: ''
     },
     validationSchema: userSchema,
     onSubmit: (values, { resetForm }) => {
+      handalSumbit(values)
       resetForm();
+      setModalVisible(!modalVisible)
     },
   });
 
-  const { handleChange, errors, values, handleSubmit, handleBlur, touched, setValues } = formik
+
+  const { handleChange, errors, values, handleSubmit, handleBlur, touched, setValues, setFieldValue } = formik
   return (
     <View style={styles.centeredView}>
       <Modal
         isVisible={modalVisible}
         animationType='slide'
-        transparent={true}
+        transparent={false}
         visible={modalVisible}
       >
 
@@ -80,8 +122,14 @@ export default function Subcategory() {
                 setValue={setValue}
                 setItems={setItems}
                 placeholder={'Choose Category.'}
+                onPress={() => setSelectdrop(!selectdrop)}
+                onChangeText={handleChange('dropdown')}
+                onSelectItem={(items) => setFieldValue('dropdown', items.value)}
+              // onBlur={handleBlur('dropdown')}
 
               />
+              <Text style={{ color: 'red', marginBottom: 3 }}>{selectdrop && touched.dropdown ? '' : errors.dropdown}</Text>
+
             </View>
 
             <View style={{
@@ -96,36 +144,47 @@ export default function Subcategory() {
                 style={styles.input}
                 placeholder='SubCategory Name'
                 placeholderTextColor='#9B9B9B'
+                onChangeText={handleChange('name')}
+                value={values.name}
+                onBlur={handleBlur('name')}
               />
+              <Text style={{ color: 'red', marginBottom: -28 }}>{errors.name && touched.name ? errors.name : ''}</Text>
             </View>
 
 
             <TouchableOpacity
               style={[styles.Sumbitbutton, styles.buttonClose]}
-              onPress={() => setModalVisible(!modalVisible)}>
+              onPress={handleSubmit}>
               <Text style={styles.textStyle}>Submit</Text>
             </TouchableOpacity>
+
           </View>
         </View>
       </Modal>
+
+
       <TouchableOpacity
         style={[styles.button, styles.buttonOpen]}
         onPress={() => setModalVisible(true)}>
         <Text style={styles.textStyle}>Add SubCategory name</Text>
       </TouchableOpacity>
-      <View style={styles.SumbitView}>
 
-        <View style={styles.TextSView}>
-          <View style={styles.maleTextView}>
-            <Text style={styles.maleText}>male</Text>
+
+      <View style={styles.SumbitView}>
+        {data.map((v, i) => (
+          <View style={styles.TextSView}>
+            <View style={styles.maleTextView}>
+              <Text style={styles.maleText}>{v.name}</Text>
+              <Text style={styles.maleText}>{v.dropdown}</Text>
+            </View>
+            <TouchableOpacity  onPress={() => handaldelte(v.id) }style={styles.deleteEditView}>
+              <MaterialIcons name="delete" size={32} color="red" paddingLeft={9} marginTop={5} />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.deleteEditView}>
+              <MaterialIcons name="edit" size={32} color="blue" paddingLeft={10} marginTop={5} />
+            </TouchableOpacity>
           </View>
-          <View style={styles.deleteEditView}>
-            <MaterialIcons name="delete" size={32} color="red" paddingLeft={9} marginTop={5} />
-          </View>
-          <View style={styles.deleteEditView}>
-            <MaterialIcons name="edit" size={32} color="blue" paddingLeft={10} marginTop={5} />
-          </View>
-        </View>
+        ))}
 
       </View>
 
@@ -235,7 +294,9 @@ const styles = StyleSheet.create({
     width: 200,
     height: '100%',
     // backgroundColor: 'pink',
+
     justifyContent: 'center',
+    flexDirection:'row',
     backgroundColor: 'white',
     borderRadius: 8,
     elevation: 4
