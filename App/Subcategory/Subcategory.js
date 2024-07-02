@@ -12,7 +12,7 @@ export default function Subcategory() {
   const [data, setdata] = useState([]);
   const [update, setUpdate] = useState(null)
   const [selectdrop, setSelectdrop] = useState('')
-
+  // const [subitems , setSubitems] = useState('')/
 
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState(null);
@@ -35,44 +35,58 @@ export default function Subcategory() {
         });
       });
 
-      const subCategoryData = [];
-      const subCategoryDetail = await firestore()
-        .collection('SubCategory')
-        .get()
-        .then(querySnapshot => {
-          querySnapshot.forEach(documentSnapshot => {
-            subCategoryData.push({ id: documentSnapshot.id, ...documentSnapshot.data() });
-          });
+    const subCategoryData = [];
+    const subCategoryDetail = await firestore()
+      .collection('SubCategory')
+      .get()
+      .then(querySnapshot => {
+        querySnapshot.forEach(documentSnapshot => {
+          subCategoryData.push({ id: documentSnapshot.id, ...documentSnapshot.data() });
         });
-  
+      });
 
-    setdata(categoryData);
+    // const cat_id = categoryData.find((v) => v.id == value.id).name
+    // setdata(categoryData);
     setdata(subCategoryData);
-    setItems(categoryData.map(v => ({ label: v.name, value: v.name })));
+    setItems(categoryData.map(v => ({ label: v.name, value: v.id })));
+
+
   }
 
   const handalSumbit = async (data) => {
-    await firestore()
-      .collection('SubCategory')
-      .add(data)
-      .then(() => {
-        console.log('SubCategory added!');
-      })
-      .catch((errors) => console.log(errors))
 
+    if (update) {
+
+      await firestore()
+        .collection('SubCategory')
+        .doc(update)
+        .set(data)
+        .then(() => {
+          console.log('SubCategory Update!');
+        })
+    } else {
+      await firestore()
+        .collection('SubCategory')
+        .add(data)
+        .then(() => {
+          console.log('SubCategory added!');
+        })
+        .catch((errors) => console.log(errors))
+
+
+    }
     getdata();
   }
   const handaldelte = async (id) => {
     await firestore()
-        .collection('SubCategory')
-        .doc(id)
-        .delete()
-        .then(() => {
-            console.log('User deleted!');
-        });
+      .collection('SubCategory')
+      .doc(id)
+      .delete()
+      .then(() => {
+        console.log('User deleted!');
+      });
     getdata();
-}
-
+  }
 
   let userSchema = object({
     name: string().required().matches(/^[a-zA-Z ]+$/, "Please enter valid name"),
@@ -94,6 +108,13 @@ export default function Subcategory() {
 
 
   const { handleChange, errors, values, handleSubmit, handleBlur, touched, setValues, setFieldValue } = formik
+
+  const handaledit = async (data) => {
+    setModalVisible(true)
+    setValues(data)
+    setUpdate(data.id)
+  }
+
   return (
     <View style={styles.centeredView}>
       <Modal
@@ -155,7 +176,7 @@ export default function Subcategory() {
             <TouchableOpacity
               style={[styles.Sumbitbutton, styles.buttonClose]}
               onPress={handleSubmit}>
-              <Text style={styles.textStyle}>Submit</Text>
+              <Text style={styles.textStyle}>{update ? 'update' : 'Sumbit'}</Text>
             </TouchableOpacity>
 
           </View>
@@ -165,7 +186,7 @@ export default function Subcategory() {
 
       <TouchableOpacity
         style={[styles.button, styles.buttonOpen]}
-        onPress={() => setModalVisible(true)}>
+        onPress={() => { setModalVisible(true), setUpdate(null) }}>
         <Text style={styles.textStyle}>Add SubCategory name</Text>
       </TouchableOpacity>
 
@@ -177,10 +198,10 @@ export default function Subcategory() {
               <Text style={styles.maleText}>{v.name}</Text>
               <Text style={styles.maleText}>{v.dropdown}</Text>
             </View>
-            <TouchableOpacity  onPress={() => handaldelte(v.id) }style={styles.deleteEditView}>
+            <TouchableOpacity onPress={() => handaldelte(v.id)} style={styles.deleteEditView}>
               <MaterialIcons name="delete" size={32} color="red" paddingLeft={9} marginTop={5} />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.deleteEditView}>
+            <TouchableOpacity onPress={() => handaledit(v)} style={styles.deleteEditView}>
               <MaterialIcons name="edit" size={32} color="blue" paddingLeft={10} marginTop={5} />
             </TouchableOpacity>
           </View>
@@ -272,7 +293,7 @@ const styles = StyleSheet.create({
   },
   SumbitView: {
     width: 410,
-    height: 250,
+    // height: 250,
     elevation: 9,
     borderRadius: 10,
     padding: 14,
@@ -291,12 +312,12 @@ const styles = StyleSheet.create({
     marginBottom: 18
   },
   maleTextView: {
-    width: 200,
-    height: '100%',
+    width: 240,
+    // height: '100%',
     // backgroundColor: 'pink',
 
     justifyContent: 'center',
-    flexDirection:'row',
+    flexDirection: 'row',
     backgroundColor: 'white',
     borderRadius: 8,
     elevation: 4
@@ -306,6 +327,7 @@ const styles = StyleSheet.create({
     fontSize: 17,
     marginLeft: 13,
     fontWeight: '500',
+    marginTop: 10
   },
   deleteEditView: {
     elevation: 5,
