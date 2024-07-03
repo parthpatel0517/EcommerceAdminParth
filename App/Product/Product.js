@@ -1,27 +1,86 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Alert, Modal, StyleSheet, Text, Pressable, View, TouchableOpacity } from 'react-native';
 import { TextInput } from 'react-native-gesture-handler';
 import DropDownPicker from 'react-native-dropdown-picker';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-
+import { object, string } from 'yup';
+import { useFormik } from 'formik';
+import firestore from '@react-native-firebase/firestore';
 
 export default function Product() {
   const [modalVisible, setModalVisible] = useState(false);
+  const [selectCatedrop, setSelectCatedrop] = useState('')
+  const [selectSubdropown, setSelectSubdrop] = useState('')
 
+  // const [categoryData, SetCategoryData] = useState([]);
+
+  const [data, setdata] = useState([]);
+  //Category's Dropdown
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState(null);
-  const [items, setItems] = useState([
-    { label: 'Men', value: 'men' },
-    { label: 'Women', value: 'women' },
-    { label: 'Mens Shirt', value: 'mens shirt' },
-  ]);
+  const [items, setItems] = useState([]);
+  //SubCategory's Dropdown
   const [opened, setOpened] = useState(false);
   const [valued, setValued] = useState(null);
-  const [itemse, setItemse] = useState([
-    { label: 'Men', value: 'men' },
-    { label: 'Women', value: 'women' },
-    { label: 'Mens Shirt', value: 'mens shirt' },
-  ]);
+  const [itemse, setItemse] = useState([]);
+
+
+  useEffect(() => {
+    getdata()
+  }, [])
+
+  const getdata = async (id) => {
+    const categoryData = [];
+    const CategoryDetail = await firestore()
+      .collection('Category')
+      .get()
+      .then(querySnapshot => {
+        console.log('Total Category: ', querySnapshot.size);
+
+        querySnapshot.forEach(documentSnapshot => {
+          categoryData.push({ id: documentSnapshot.id, ...documentSnapshot.data() });
+        });
+      });
+    // SetCategoryData(categoryData)
+    const subCategoryData = [];
+    const subCategoryDetail = await firestore()
+      .collection('SubCategory')
+      .get()
+      .then(querySnapshot => {
+        querySnapshot.forEach(documentSnapshot => {
+          subCategoryData.push({ id: documentSnapshot.id, ...documentSnapshot.data() });
+        });
+      });
+      const Fdata= subCategoryData.filter((v)=>v.category_id === id)
+      console.log("djsjjsjsjsjj",Fdata)
+    setdata(subCategoryData);
+    setdata(categoryData)
+    setItems(categoryData.map(v => ({ label: v.name, value: v.id })));
+    setItemse(Fdata.map(v => ({ label: v.name, value: v.id })))
+
+  }
+  let userSchema = object({
+   
+    category_id: string().required('Please select category'),
+    Subcategory_id: string().required('Please select Subcategory'),
+    Productname: string().required(),
+  });
+
+  const formik = useFormik({
+    initialValues: {
+      Productname: '',
+      category_id: '',
+      Subcategory_id: ''
+    },
+    validationSchema: userSchema,
+    onSubmit: (values, { resetForm }) => {
+      resetForm();
+      setModalVisible(!modalVisible)
+    },
+  });
+
+
+  const { handleChange, errors, values, handleSubmit, handleBlur, touched, setValues, setFieldValue } = formik
 
   return (
     <View style={styles.centeredView}>
@@ -35,7 +94,7 @@ export default function Product() {
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
             <Text style={styles.modalText}>Add Product detail</Text>
-            
+
             <View
               style={{
                 width: 200,
@@ -43,7 +102,7 @@ export default function Product() {
                 zIndex: 1000,
                 paddingHorizontal: 15,
               }}>
-                
+
               <DropDownPicker
                 open={open}
                 value={value}
@@ -52,12 +111,15 @@ export default function Product() {
                 setValue={setValue}
                 setItems={setItems}
                 placeholder={'Choose Category.'}
+                onPress={() => setSelectCatedrop(!selectCatedrop)}
+                onChangeText={getdata(value)}
+                onSelectItem={(items) => setFieldValue('category_id', items.value)}
               />
-
+              <Text style={{ color: 'red', marginBottom: 3 }}>{selectCatedrop && touched.category_id ? '' : errors.category_id}</Text>
             </View>
             <View
               style={{
-                marginTop:30,
+                marginTop: 30,
                 width: 250,
                 position: 'relative',
                 zIndex: 999,
@@ -71,7 +133,11 @@ export default function Product() {
                 setValue={setValued}
                 setItems={setItemse}
                 placeholder={'Choose SubCategory.'}
+                onPress={() => setSelectSubdrop(!selectSubdropown)}
+                onChangeText={handleChange('Subcategory_id')}
+                onSelectItem={(items) => setFieldValue('Subcategory_id', items.value)}
               />
+              <Text style={{ color: 'red', marginBottom: 3 }}>{selectSubdropown && touched.Subcategory_id ? '' : errors.Subcategory_id}</Text>
             </View>
             <View style={{
               flex: 1,
@@ -89,14 +155,14 @@ export default function Product() {
             </View>
             <View>
               <TextInput
-                style={[styles.input,styles.PriceInput]}
+                style={[styles.input, styles.PriceInput]}
                 placeholder='Price'
                 placeholderTextColor='#9B9B9B'
               />
             </View>
             <View>
               <TextInput
-                style={[styles.input,styles.descriptionInput]}
+                style={[styles.input, styles.descriptionInput]}
                 placeholder='Description'
                 placeholderTextColor='#9B9B9B'
               />
@@ -105,7 +171,7 @@ export default function Product() {
 
             <TouchableOpacity
               style={[styles.button, styles.buttonClose]}
-              onPress={() => setModalVisible(!modalVisible)}>
+              onPress={handleSubmit}>
               <Text style={styles.textStyle}>Submit</Text>
             </TouchableOpacity>
           </View>
@@ -195,7 +261,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: 'black',
     fontSize: 20,
-    fontWeight:'500'
+    fontWeight: '500'
   },
   input: {
     width: 210,
@@ -216,11 +282,11 @@ const styles = StyleSheet.create({
     },
     elevation: 3,
   },
-  PriceInput:{
-    marginTop:10
+  PriceInput: {
+    marginTop: 10
   },
-  descriptionInput:{
-    marginTop:10
+  descriptionInput: {
+    marginTop: 10
   },
   SumbitView: {
     width: 410,
@@ -240,7 +306,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     backgroundColor: 'white',
     elevation: 3,
-    marginBottom:18
+    marginBottom: 18
   },
   maleTextView: {
     width: 200,

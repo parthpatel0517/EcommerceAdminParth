@@ -12,6 +12,7 @@ export default function Subcategory() {
   const [data, setdata] = useState([]);
   const [update, setUpdate] = useState(null)
   const [selectdrop, setSelectdrop] = useState('')
+  const [categoryData, SetCategoryData] = useState([]);
   // const [subitems , setSubitems] = useState('')/
 
   const [open, setOpen] = useState(false);
@@ -34,7 +35,7 @@ export default function Subcategory() {
           categoryData.push({ id: documentSnapshot.id, ...documentSnapshot.data() });
         });
       });
-
+      SetCategoryData(categoryData)
     const subCategoryData = [];
     const subCategoryDetail = await firestore()
       .collection('SubCategory')
@@ -46,7 +47,7 @@ export default function Subcategory() {
       });
 
     // const cat_id = categoryData.find((v) => v.id == value.id).name
-    // setdata(categoryData);
+    // setdata(categoryData);`
     setdata(subCategoryData);
     setItems(categoryData.map(v => ({ label: v.name, value: v.id })));
 
@@ -90,13 +91,13 @@ export default function Subcategory() {
 
   let userSchema = object({
     name: string().required().matches(/^[a-zA-Z ]+$/, "Please enter valid name"),
-    dropdown: string().required('Please select category')
+    category_id: string().required('Please select category')
   });
 
   const formik = useFormik({
     initialValues: {
       name: '',
-      dropdown: ''
+      category_id: ''
     },
     validationSchema: userSchema,
     onSubmit: (values, { resetForm }) => {
@@ -114,6 +115,8 @@ export default function Subcategory() {
     setValues(data)
     setUpdate(data.id)
   }
+
+  console.log(categoryData);
 
   return (
     <View style={styles.centeredView}>
@@ -144,12 +147,12 @@ export default function Subcategory() {
                 setItems={setItems}
                 placeholder={'Choose Category.'}
                 onPress={() => setSelectdrop(!selectdrop)}
-                onChangeText={handleChange('dropdown')}
-                onSelectItem={(items) => setFieldValue('dropdown', items.value)}
-              // onBlur={handleBlur('dropdown')}
+                onChangeText={handleChange('category_id')}
+                onSelectItem={(items) => setFieldValue('category_id', items.value)}
+              // onBlur={handleBlur(' category_id')}
 
               />
-              <Text style={{ color: 'red', marginBottom: 3 }}>{selectdrop && touched.dropdown ? '' : errors.dropdown}</Text>
+              <Text style={{ color: 'red', marginBottom: 3 }}>{selectdrop && touched.category_id ? '' : errors.category_id}</Text>
 
             </View>
 
@@ -196,7 +199,7 @@ export default function Subcategory() {
           <View style={styles.TextSView}>
             <View style={styles.maleTextView}>
               <Text style={styles.maleText}>{v.name}</Text>
-              <Text style={styles.maleText}>{v.dropdown}</Text>
+              <Text style={styles.maleText}>{categoryData.find((v1)=>v.category_id === v1.id)?.name}</Text>
             </View>
             <TouchableOpacity onPress={() => handaldelte(v.id)} style={styles.deleteEditView}>
               <MaterialIcons name="delete" size={32} color="red" paddingLeft={9} marginTop={5} />
