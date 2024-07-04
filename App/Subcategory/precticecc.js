@@ -558,3 +558,287 @@
 //                     <View key={v.id} style={styles.TextSView}>
 //                         <View style={styles.maleTextView}>
 //                             <Text style={styles.maleText}>{v.name}</Text>
+import React, { useEffect, useState } from 'react';
+import { Alert, Modal, StyleSheet, Text, Pressable, View, TouchableOpacity } from 'react-native';
+import { ScrollView, TextInput } from 'react-native-gesture-handler';
+import DropDownPicker from 'react-native-dropdown-picker';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { number, object, string } from 'yup';
+import { useFormik } from 'formik';
+import firestore from '@react-native-firebase/firestore';
+
+export default function Product() {
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectCatedrop, setSelectCatedrop] = useState(false);
+  const [products, setProducts] = useState([]);
+
+  //Category's Dropdown
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState(null);
+  const [items, setItems] = useState([]);
+  //SubCategory's Dropdown
+  const [opened, setOpened] = useState(false);
+  const [valued, setValued] = useState(null);
+  const [itemse, setItemse] = useState([]);
+
+  useEffect(() => {
+    fetchCategories();
+    fetchProducts();
+  }, []);
+
+  const fetchCategories = async () => {
+    const categoryData = [];
+    await firestore()
+      .collection('Category')
+      .get()
+      .then(querySnapshot => {
+        querySnapshot.forEach(documentSnapshot => {
+          categoryData.push({ id: documentSnapshot.id, ...documentSnapshot.data() });
+        });
+      });
+    setItems(categoryData.map(v => ({ label: v.name, value: v.id })));
+  };
+
+  const fetchSubCategories = async (categoryId) => {
+    const subCategoryData = [];
+    await firestore()
+      .collection('SubCategory')
+      .get()
+      .then(querySnapshot => {
+        querySnapshot.forEach(documentSnapshot => {
+          subCategoryData.push({ id: documentSnapshot.id, ...documentSnapshot.data() });
+        });
+      });
+    const filteredSubCategories = subCategoryData.filter(subCat => subCat.category_id === categoryId);
+    setItemse(filteredSubCategories.map(v => ({ label: v.name, value: v.id })));
+  };
+
+  const fetchProducts = async () => {
+    const productsData = [];
+    await firestore()
+      .collection('Product')
+      .get()
+      .then(querySnapshot => {
+        querySnapshot.forEach(documentSnapshot => {
+          productsData.push({ id: documentSnapshot.id, ...documentSnapshot.data() });
+        });
+      });
+    setProducts(productsData);
+  };
+
+  const handleDelete = async (id) => {
+    await firestore()
+      .collection('Product')
+      .doc(id)
+      .delete()
+      .then(() => {
+        console.log('Product deleted!');
+        fetchProducts();
+      });
+  };
+
+  const handleSubmitProduct = async (data) => {
+    await firestore()
+      .collection('Product')
+      .add(data)
+      .then(() => {
+        console.log('Product added!');
+        fetchProducts();
+      })
+      .catch(error => console.log(error));
+  };
+
+  let productSchema = object({
+    category_id: string().required('Please select category'),
+    Subcategory_id: string().required('Please select Subcategory'),
+    Productname: string().required('Please enter product name'),
+    Price: number().required('Please enter product price'),
+    Description: string().required('Please enter product description')
+  });
+
+  const formik = useFormik({
+    initialValues: {
+      category_id: '',
+      Subcategory_id: '',
+      Productname: '',
+      Price: '',
+      Description: ''
+    },
+    validationSchema: productSchema,
+    onSubmit: (values, { resetForm }) => {
+      handleSubmitProduct(values);
+      resetForm();
+      setModalVisible(false);
+    },
+  });
+
+  const { handleChange, errors, values, handleSubmit, handleBlur, touched, setFieldValue } = formik;
+
+  return (
+    <ScrollView>
+      <Modal
+        animationType='slide'
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <Text style={styles.modalText}>Add Product Detail</Text>
+
+            <View style={styles.dropdownContainer}>
+              <DropDownPicker
+                open={open}
+                value={value}
+                items={items}
+                setOpen={setOpen}
+                setValue={setValue}
+                setItems={setItems}
+                placeholder={'Choose Category'}
+                onChangeValue={(value) => {
+                  setFieldValue('category_id', value);
+                  fetchSubCategories(value);
+                }}
+              />
+              {touched.category_id && errors.category_id && <Text style={styles.errorText}>{errors.category_id}</Text>}
+            </View>
+
+            <View style={styles.dropdownContainer}>
+              <DropDownPicker
+                open={opened}
+                value={valued}
+                items={itemse}
+                setOpen={setOpened}
+                setValue={setValued}
+                setItems={setItemse}
+                placeholder={'Choose SubCategory'}
+                onChangeValue={(value) => setFieldValue('Subcategory_id', value)}
+              />
+              {touched.Subcategory_id && errors.Subcategory_id && <Text style={styles.errorText}>{errors.Subcategory_id}</Text>}
+            </View>
+
+            <View>
+              <TextInput
+                style={styles.input}
+                placeholder='Product Name'
+                placeholderTextColor='#9B9B9B'
+                onChangeText={handleChange('Productname')}
+                onBlur={handleBlur('Productname')}
+                value={values.Productname}
+              />
+              {touched.Productname && errors.Productname && <Text style={styles.errorText}>{errors.Productname}</Text>}
+            </View>
+
+            <View>
+              <TextInput
+                style={styles.input}
+                placeholder='Price'
+                placeholderTextColor='#9B9B9B'
+                onChangeText={handleChange('Price')}
+                onBlur={handleBlur('Price')}
+                value={values.Price}
+                keyboardType='numeric'
+              />
+              {touched.Price && errors.Price && <Text style={styles.errorText}>{errors.Price}</Text>}
+            </View>
+
+            <View>
+              <TextInput
+                style={styles.input}
+                placeholder='Description'
+                placeholderTextColor='#9B9B9B'
+                onChangeText={handleChange('Description')}
+                onBlur={handleBlur('Description')}
+                value={values.Description}
+              />
+              {touched.Description && errors.Description && <Text style={styles.errorText}>{errors.Description}</Text>}
+            </View>
+
+            <TouchableOpacity style={[styles.button, styles.buttonClose]} onPress={handleSubmit}>
+              <Text style={styles.textStyle}>Submit</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      <TouchableOpacity style={[styles.button, styles.buttonOpen]} onPress={() => setModalVisible(true)}>
+        <Text style={styles.textStyle}>Add Product Detail</Text>
+      </TouchableOpacity>
+
+      <View style={styles.productsContainer}>
+        {products.map((product) => (
+          <View key={product.id} style={styles.productItem}>
+            <Text style={styles.productText}>{product.Productname}</Text>
+            <Text style={styles.productText}>Price: {product.Price}</Text>
+            <Text style={styles.productText}>Description: {product.Description}</Text>
+            <View style={styles.actionsContainer}>
+              <TouchableOpacity onPress={() => handleDelete(product.id)}>
+                <MaterialIcons name="delete" size={32} color="red" />
+              </TouchableOpacity>
+              <TouchableOpacity>
+                <MaterialIcons name="edit" size={32} color="blue" />
+              </TouchableOpacity>
+            </View>
+          </View>
+        ))}
+      </View>
+    </ScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 40,
+  },
+  modalView: {
+    width: 300,
+    margin: 20,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 35,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  button: {
+    borderRadius: 35,
+    padding: 10,
+    elevation: 2,
+    marginTop: 20,
+  },
+  buttonOpen: {
+    backgroundColor: '#F194FF',
+  },
+  buttonClose: {
+    backgroundColor: '#2196F3',
+  },
+  textStyle: {
+    color: 'white',
+    fontWeight: 'bold',
+    textAlign: 'center',
+    fontSize: 17,
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: 'center',
+    color: 'black',
+    fontSize: 20,
+    fontWeight: '500',
+  },
+  input: {
+    width: 250,
+    backgroundColor: '#FFFFFF',
+    paddingVertical: 10,
+    marginBottom: 20,
+    paddingLeft: 10,
+  }
+})

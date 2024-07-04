@@ -1,20 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import { Alert, Modal, StyleSheet, Text, Pressable, View, TouchableOpacity } from 'react-native';
-import { TextInput } from 'react-native-gesture-handler';
+import { ScrollView, TextInput } from 'react-native-gesture-handler';
 import DropDownPicker from 'react-native-dropdown-picker';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import { object, string } from 'yup';
+import { number, object, string } from 'yup';
 import { useFormik } from 'formik';
 import firestore from '@react-native-firebase/firestore';
 
 export default function Product() {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectCatedrop, setSelectCatedrop] = useState('')
-  const [selectSubdropown, setSelectSubdrop] = useState('')
+  const [products, setProducts] = useState([]);
+  const [update , setUpdate] =useState([])
+  // const [selectSubdropown, setSelectSubdrop] = useState('')
 
   // const [categoryData, SetCategoryData] = useState([]);
 
   const [data, setdata] = useState([]);
+  const [datasub, setdatasub] = useState([]);
   //Category's Dropdown
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState(null);
@@ -27,11 +30,12 @@ export default function Product() {
 
   useEffect(() => {
     getdata()
+    Products()
   }, [])
 
-  const getdata = async (id) => {
+  const getdata = async () => {
     const categoryData = [];
-    const CategoryDetail = await firestore()
+    const sub = await firestore()
       .collection('Category')
       .get()
       .then(querySnapshot => {
@@ -42,8 +46,15 @@ export default function Product() {
         });
       });
     // SetCategoryData(categoryData)
+
+    setdata(categoryData)
+    setItems(categoryData.map(v => ({ label: v.name, value: v.id })));
+
+  }
+
+  const getSubData = async (id) => {
     const subCategoryData = [];
-    const subCategoryDetail = await firestore()
+    const isd = await firestore()
       .collection('SubCategory')
       .get()
       .then(querySnapshot => {
@@ -51,29 +62,76 @@ export default function Product() {
           subCategoryData.push({ id: documentSnapshot.id, ...documentSnapshot.data() });
         });
       });
-      const Fdata= subCategoryData.filter((v)=>v.category_id === id)
-      console.log("djsjjsjsjsjj",Fdata)
-    setdata(subCategoryData);
-    setdata(categoryData)
-    setItems(categoryData.map(v => ({ label: v.name, value: v.id })));
+    const Fdata = subCategoryData.filter((v) => v.category_id === id)
+    console.log("djsjjsjsjsjj", Fdata)
+    setdatasub(subCategoryData);
     setItemse(Fdata.map(v => ({ label: v.name, value: v.id })))
+  }
 
+  const handalSumbit = async (data) => {
+    if(update){
+      await firestore()
+      .collection('Product')
+      .doc(update)
+      .set(data)
+      .then(() => {
+        console.log('Product Update!');
+      })
+    } else{
+      await firestore()
+      .collection('Product')
+      .add(data)
+      .then(() => {
+        console.log('Product added!');
+        Products();
+      })
+      .catch((errors) => console.log(errors))
+    }
+   
+  }
+  const Products = async () => {
+    const productsData = [];
+    await firestore()
+      .collection('Product')
+      .get()
+      .then(querySnapshot => {
+        querySnapshot.forEach(documentSnapshot => {
+          productsData.push({ id: documentSnapshot.id, ...documentSnapshot.data() });
+        });
+      });
+    setProducts(productsData);
+  };
+  const handaldelte = async (id) => {
+    console.log(id);
+    await firestore()
+      .collection('Product')
+      .doc(id)
+      .delete()
+      .then(() => {
+        console.log('User deleted!');
+        Products();
+      });
+    getdata();
   }
   let userSchema = object({
-   
     category_id: string().required('Please select category'),
     Subcategory_id: string().required('Please select Subcategory'),
-    Productname: string().required(),
+    Productname: string().required('Please enter product name'),
+    Price: number().required('Please enter product price'),
+    Description: string().required('Please enter product description')
   });
 
   const formik = useFormik({
     initialValues: {
-      Productname: '',
       category_id: '',
-      Subcategory_id: ''
+      Subcategory_id: '',
+      Productname: '',
+      Price: '',
+      Description: ''
     },
     validationSchema: userSchema,
     onSubmit: (values, { resetForm }) => {
+      handalSumbit(values)
       resetForm();
       setModalVisible(!modalVisible)
     },
@@ -81,9 +139,14 @@ export default function Product() {
 
 
   const { handleChange, errors, values, handleSubmit, handleBlur, touched, setValues, setFieldValue } = formik
-
+  const handaledit= (data)=>{
+    setModalVisible(true)
+    setValues(data)
+    setUpdate(data.id)
+  }
   return (
-    <View style={styles.centeredView}>
+    <ScrollView>
+
       <Modal
         isVisible={modalVisible}
         animationType='slide'
@@ -112,7 +175,7 @@ export default function Product() {
                 setItems={setItems}
                 placeholder={'Choose Category.'}
                 onPress={() => setSelectCatedrop(!selectCatedrop)}
-                onChangeText={getdata(value)}
+                onChangeValue={() => getSubData(value)}
                 onSelectItem={(items) => setFieldValue('category_id', items.value)}
               />
               <Text style={{ color: 'red', marginBottom: 3 }}>{selectCatedrop && touched.category_id ? '' : errors.category_id}</Text>
@@ -133,11 +196,11 @@ export default function Product() {
                 setValue={setValued}
                 setItems={setItemse}
                 placeholder={'Choose SubCategory.'}
-                onPress={() => setSelectSubdrop(!selectSubdropown)}
+                onPress={() => setSelectCatedrop(!selectCatedrop)}
                 onChangeText={handleChange('Subcategory_id')}
                 onSelectItem={(items) => setFieldValue('Subcategory_id', items.value)}
               />
-              <Text style={{ color: 'red', marginBottom: 3 }}>{selectSubdropown && touched.Subcategory_id ? '' : errors.Subcategory_id}</Text>
+              <Text style={{ color: 'red', marginBottom: 3 }}>{selectCatedrop && touched.Subcategory_id ? '' : errors.Subcategory_id}</Text>
             </View>
             <View style={{
               flex: 1,
@@ -149,23 +212,36 @@ export default function Product() {
             <View>
               <TextInput
                 style={styles.input}
-                placeholder='Name'
+                placeholder='Productname'
                 placeholderTextColor='#9B9B9B'
+                onChangeText={handleChange('Productname')}
+                onBlur={handleBlur('Productname')}
+                value={values.Productname}
               />
+              <Text style={{ color: 'red', marginBottom: 3 }}>{errors.Productname && touched.Productname ? errors.Productname : ''}</Text>
             </View>
             <View>
               <TextInput
                 style={[styles.input, styles.PriceInput]}
                 placeholder='Price'
                 placeholderTextColor='#9B9B9B'
+                onChangeText={handleChange('Price')}
+                onBlur={handleBlur('Price')}
+                value={values.Price}
               />
+              <Text style={{ color: 'red', marginBottom: 3 }}>{errors.Price && touched.Price ? errors.Price : ''}</Text>
             </View>
             <View>
               <TextInput
                 style={[styles.input, styles.descriptionInput]}
                 placeholder='Description'
                 placeholderTextColor='#9B9B9B'
+                onChangeText={handleChange('Description')}
+                onBlur={handleBlur('Description')}
+                value={values.Description}
               />
+
+              <Text style={{ color: 'red', marginBottom: 3 }}>{errors.Description && touched.Description ? errors.Description : ''}</Text>
             </View>
 
 
@@ -184,31 +260,24 @@ export default function Product() {
       </TouchableOpacity>
 
       <View style={styles.SumbitView}>
-        <View style={styles.TextSView}>
-          <View style={styles.maleTextView}>
-            <Text style={styles.maleText}>Male</Text>
+      {products.map((v,i) => (
+          <View key={i} style={styles.TextSView}>
+            <View style={styles.maleTextView}>
+            <Text style={styles.maleText}>Product name: {v.Productname}</Text>
+            <Text style={styles.maleText}>Price: {v.Price}</Text>
+            <Text style={styles.maleText}>Description: {v.Description}</Text>
+            </View>
+            <TouchableOpacity onPress={() => handaldelte(v.id)}  style={styles.deleteEditView}>
+              <MaterialIcons name="delete" size={32} color="red" paddingLeft={9} marginTop={30} />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => handaledit(v)} style={styles.deleteEditView}>
+              <MaterialIcons name="edit" size={32} color="blue" paddingLeft={10} marginTop={30} />
+            </TouchableOpacity>
           </View>
-          <View style={styles.deleteEditView}>
-            <MaterialIcons name="delete" size={32} color="red" paddingLeft={9} marginTop={5} />
-          </View>
-          <View style={styles.deleteEditView}>
-            <MaterialIcons name="edit" size={32} color="blue" paddingLeft={10} marginTop={5} />
-          </View>
-        </View>
-        <View style={styles.TextSView}>
-          <View style={styles.maleTextView}>
-            <Text style={styles.maleText}>Male</Text>
-          </View>
-          <View style={styles.deleteEditView}>
-            <MaterialIcons name="delete" size={32} color="red" paddingLeft={9} marginTop={5} />
-          </View>
-          <View style={styles.deleteEditView}>
-            <MaterialIcons name="edit" size={32} color="blue" paddingLeft={10} marginTop={5} />
-          </View>
-        </View>
+        ))}
       </View>
 
-    </View>
+    </ScrollView>
   )
 }
 
@@ -270,7 +339,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     marginBottom: 25,
     paddingLeft: 10,
-    color: 'white',
+    color: 'black',
     borderRadius: 5,
     fontSize: 18,
     fontWeight: '400',
@@ -290,30 +359,33 @@ const styles = StyleSheet.create({
   },
   SumbitView: {
     width: 410,
-    height: 250,
+    // height: 250,
     elevation: 9,
     borderRadius: 10,
     padding: 14,
     marginTop: 100,
+     paddingVertical:40,
     backgroundColor: 'white'
   },
   TextSView: {
     width: '100%',
-    height: 45,
+    height: 100,
     // backgroundColor: 'green',
     borderRadius: 8,
     flexDirection: 'row',
     justifyContent: 'space-between',
     backgroundColor: 'white',
     elevation: 3,
+    //  paddingVertical:20,
     marginBottom: 18
   },
   maleTextView: {
-    width: 200,
-    height: '100%',
+    width: 240,
+    height: 100,
     // backgroundColor: 'pink',
     justifyContent: 'center',
     backgroundColor: 'white',
+    // paddingVertical:20,/
     borderRadius: 8,
     elevation: 4
   },
@@ -322,6 +394,7 @@ const styles = StyleSheet.create({
     fontSize: 17,
     marginLeft: 13,
     fontWeight: '500',
+    //  paddingVertical:20,
   },
   deleteEditView: {
     elevation: 5,

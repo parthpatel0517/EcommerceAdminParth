@@ -73,8 +73,6 @@ export default function Subcategory() {
           console.log('SubCategory added!');
         })
         .catch((errors) => console.log(errors))
-
-
     }
     getdata();
   }
@@ -195,7 +193,7 @@ export default function Subcategory() {
 
 
       <View style={styles.SumbitView}>
-        {data.map((v, i) => (
+      {data.map((v, i) => (
           <View style={styles.TextSView}>
             <View style={styles.maleTextView}>
               <Text style={styles.maleText}>{v.name}</Text>
@@ -208,7 +206,7 @@ export default function Subcategory() {
               <MaterialIcons name="edit" size={32} color="blue" paddingLeft={10} marginTop={5} />
             </TouchableOpacity>
           </View>
-        ))}
+      ))}
 
       </View>
 
