@@ -4,13 +4,21 @@ import 'react-native-gesture-handler';
 import React from 'react'
 import Category from './App/Drawers/Drawers';
 import Drawers from './App/Drawers/Drawers';
+import { configurestore } from './App/redux/store';
+import Counter from './App/Counter/Counter';
+import { Provider } from 'react-redux';
+
+
 
 export default function App() {
+  const store = configurestore()
   return (
-    
-    <NavigationContainer>
+    <Provider store={store}>
+    {/* <NavigationContainer>
         <Drawers></Drawers>
-    </NavigationContainer>
+    </NavigationContainer> */}
+    <Counter></Counter>
+    </Provider>
   
    
   )

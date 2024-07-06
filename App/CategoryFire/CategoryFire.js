@@ -37,6 +37,7 @@ export default function CategoryFire() {
     }
 
     const handleSubmit1 = async (data) => {
+       
         setModalVisible(false)
         if (update) {
           await firestore()
@@ -71,6 +72,7 @@ export default function CategoryFire() {
         },
         validationSchema: userSchema,
         onSubmit: (values, { resetForm }) => {
+            console.log(values);
             handleSubmit1(values)
             resetForm();
         },

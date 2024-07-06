@@ -69,23 +69,33 @@ export default function Product() {
   }
 
   const handalSumbit = async (data) => {
+    console.log(data);
     if(update){
-      await firestore()
-      .collection('Product')
-      .doc(update)
-      .set(data)
-      .then(() => {
-        console.log('Product Update!');
-      })
+      try {
+        await firestore()
+        .collection('Product')
+        .doc(update)
+        .set(data)
+        .then(() => {
+          console.log('Product Update!');
+        })
+      } catch (error) {
+        console.log(error);
+      }
+     
     } else{
-      await firestore()
-      .collection('Product')
-      .add(data)
-      .then(() => {
-        console.log('Product added!');
-        Products();
-      })
-      .catch((errors) => console.log(errors))
+      try {
+        await firestore()
+        .collection('Product')
+        .add(data)
+        .then(() => {
+          console.log('Product added!');
+          Products();
+        })
+        .catch((errors) => console.log(errors))
+      } catch (error) {
+        console.log(error);
+      }
     }
    
   }
