@@ -8,6 +8,7 @@ import NetInfo from "@react-native-community/netinfo";
 import { object, string, number, date, InferType } from 'yup';
 import { useFormik } from 'formik';
 import firestore from '@react-native-firebase/firestore';
+import { getcatedata } from '../redux/action/categoryfire.action';
 
 
 
@@ -22,18 +23,8 @@ export default function CategoryFire() {
     }, [])
 
     const getdata = async () => {
-        const categoryData = [];
-        const CategoryDetail = await firestore()
-            .collection('Category')
-            .get()
-            .then(querySnapshot => {
-                console.log('Total Category: ', querySnapshot.size);
-
-                querySnapshot.forEach(documentSnapshot => {
-                    categoryData.push({ id: documentSnapshot.id, ...documentSnapshot.data() });
-                });
-            });
-        setdata(categoryData);
+        getcatedata()
+          setdata(categoryData);
     }
 
     const handleSubmit1 = async (data) => {

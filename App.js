@@ -14,10 +14,10 @@ export default function App() {
   const store = configurestore()
   return (
     <Provider store={store}>
-    {/* <NavigationContainer>
+    <NavigationContainer>
         <Drawers></Drawers>
-    </NavigationContainer> */}
-    <Counter></Counter>
+    </NavigationContainer>
+    {/* <Counter></Counter> */}
     </Provider>
   
    
