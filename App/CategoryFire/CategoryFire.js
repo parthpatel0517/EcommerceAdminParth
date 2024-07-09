@@ -8,7 +8,8 @@ import NetInfo from "@react-native-community/netinfo";
 import { object, string, number, date, InferType } from 'yup';
 import { useFormik } from 'formik';
 import firestore from '@react-native-firebase/firestore';
-import { getcatedata } from '../redux/action/categoryfire.action';
+import { addcategory, deletecategory, getcategorydata } from '../redux/action/categoryfire.action';
+import { useDispatch, useSelector } from 'react-redux';
 
 
 
@@ -21,15 +22,21 @@ export default function CategoryFire() {
     useEffect(() => {
         getdata()
     }, [])
+    
+   const  dispatch = useDispatch()
+   const category = useSelector(state => state.category)
+   console.log("dkdkddkdk",category.categoryfire);
+
 
     const getdata = async () => {
-        getcatedata()
-          setdata(categoryData);
+        dispatch(getcategorydata())
+        //   setdata(categoryData);
     }
 
     const handleSubmit1 = async (data) => {
        
         setModalVisible(false)
+        
         if (update) {
           await firestore()
                 .collection('Category')
@@ -40,15 +47,10 @@ export default function CategoryFire() {
                 });
                 console.log("Sssss",data);
         } else {
-            await firestore()
-                .collection('Category')
-                .add(data)
-                .then(() => {
-                    console.log('Category added!');
-                })
-                .catch((errors) => console.log(errors))
+            console.log("osososoososososoososososososos",data);
+         dispatch(addcategory(data))
         }
-        getdata();
+        
         setUpdate(null)
 
     }
@@ -69,13 +71,7 @@ export default function CategoryFire() {
         },
     });
     const handaldelte = async (id) => {
-        await firestore()
-            .collection('Category')
-            .doc(id)
-            .delete()
-            .then(() => {
-                console.log('User deleted!');
-            });
+     dispatch(deletecategory(id))
         getdata();
     }
 
@@ -121,7 +117,7 @@ export default function CategoryFire() {
             </TouchableOpacity>
 
             <View style={styles.SumbitView}>
-                {data.map((v, i) => (
+                {category.categoryfire.map((v, i) => (
                     <View key={i} style={styles.TextSView}>
                         <View style={styles.maleTextView}>
                             <Text style={styles.maleText}>{v.name}</Text>

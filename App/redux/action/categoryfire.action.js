@@ -1,10 +1,10 @@
-import { GETDATA, INCREMENT_COUNTER } from "../ActionType"
-
-export const getcatedata = () => async (dispatch) => {
-    dispatch({ type: GETDATA })
+import { ADD_CATEGORY, DELETE_CATEGORY, GET_CATEGORY } from "../ActionType"
+import firestore from '@react-native-firebase/firestore';
+export const getcategorydata = () => async (dispatch) => {
+ 
     try {
         const categoryData = [];
-        const CategoryDetail = await firestore()
+      await firestore()
             .collection('Category')
             .get()
             .then(querySnapshot => {
@@ -15,9 +15,42 @@ export const getcatedata = () => async (dispatch) => {
                 });
                 
             });
+
+            console.log("actionnnnnn", categoryData);
+            dispatch({ type: GET_CATEGORY ,payload : categoryData})
     } catch (error) {
-
+        console.log(error);
     }
+}
 
+export const addcategory = (data) => async (dispatch) => {
+    console.log("lllslslslllslsllslslsllsllslslslsls",data);
+    try {
+        await firestore()
+                .collection('Category')
+                .add(data)
+                .then((doc) => {
+                    console.log('Category addd!',doc.id);
+                    dispatch({ type: ADD_CATEGORY ,payload: {...data,id:doc.id}})
+                })
+                .catch((errors) => console.log(errors))
 
+         
+    } catch (error) {
+        console.log(error);
+    }
+}
+export const deletecategory = (id) => async (dispatch)=>{
+    try {
+        await firestore()
+        .collection('Category')
+        .doc(id)
+        .delete()
+        .then(() => {
+         dispatch({type:DELETE_CATEGORY,payload:id})
+        });
+    } catch (error) {
+        console.log(error);
+    }
+  
 }

@@ -1,18 +1,34 @@
-import { DECREMENT_COUNTER, GETDATA, INCREMENT_COUNTER } from "../ActionType";
+import {  ADD_CATEGORY, DELETE_CATEGORY, GET_CATEGORY } from "../ActionType";
 
 
 const initialState = {
-    count: []
+    isLoading:false,
+    categoryfire: [],
+    error : null
 }
 
 export const categoryReducer = (state = initialState, action) => {
     console.log(action);
 
     switch (action.type) {
-        case GETDATA:
+        case GET_CATEGORY:
             return {
-                count: action.payload
+                isLoading:false,
+                categoryfire: action.payload,
+                error : null
             }
+            case ADD_CATEGORY:
+                return{
+                    isLoading:false,
+                    categoryfire: state.categoryfire.concat(action.payload),
+                    error : null
+                }
+                case DELETE_CATEGORY:
+                    return{
+                        isLoading:false,
+                        categoryfire: state.categoryfire.filter((v)=>v.id !== action.payload),
+                        error : null
+                    }
         default:
             return state
     }
