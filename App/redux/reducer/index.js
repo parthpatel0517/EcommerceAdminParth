@@ -2,9 +2,12 @@
 import { combineReducers } from "redux";
 import { counterReducer } from "./counter.reducer";
 import { categoryReducer } from "./categoryfire.reducer";
+import { subcategoryReducer } from "./subcategory.reducer";
 
 
 export const rootReducer = combineReducers({
     count : counterReducer,
-    category : categoryReducer
+    category : categoryReducer,
+    subcategory : subcategoryReducer
+
 })

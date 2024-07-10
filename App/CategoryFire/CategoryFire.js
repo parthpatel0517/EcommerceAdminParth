@@ -8,7 +8,7 @@ import NetInfo from "@react-native-community/netinfo";
 import { object, string, number, date, InferType } from 'yup';
 import { useFormik } from 'formik';
 import firestore from '@react-native-firebase/firestore';
-import { addcategory, deletecategory, getcategorydata } from '../redux/action/categoryfire.action';
+import { addcategory, deletecategory, getcategorydata, updatecategory } from '../redux/action/categoryfire.action';
 import { useDispatch, useSelector } from 'react-redux';
 
 
@@ -22,10 +22,10 @@ export default function CategoryFire() {
     useEffect(() => {
         getdata()
     }, [])
-    
-   const  dispatch = useDispatch()
-   const category = useSelector(state => state.category)
-   console.log("dkdkddkdk",category.categoryfire);
+
+    const dispatch = useDispatch()
+    const category = useSelector(state => state.category)
+    console.log("dkdkddkdk", category.categoryfire);
 
 
     const getdata = async () => {
@@ -34,23 +34,15 @@ export default function CategoryFire() {
     }
 
     const handleSubmit1 = async (data) => {
-       
+
         setModalVisible(false)
-        
+
         if (update) {
-          await firestore()
-                .collection('Category')
-                .doc(update)
-                .set(data)
-                .then(() => {
-                    console.log('User added!');
-                });
-                console.log("Sssss",data);
+            dispatch(updatecategory(data))
         } else {
-            console.log("osososoososososoososososososos",data);
-         dispatch(addcategory(data))
+            console.log("osososoososososoososososososos", data);
+            dispatch(addcategory(data))
         }
-        
         setUpdate(null)
 
     }
@@ -71,7 +63,7 @@ export default function CategoryFire() {
         },
     });
     const handaldelte = async (id) => {
-     dispatch(deletecategory(id))
+        dispatch(deletecategory(id))
         getdata();
     }
 

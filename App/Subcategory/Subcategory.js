@@ -22,7 +22,7 @@ export default function Subcategory() {
   useEffect(() => {
     getdata()
   }, [])
-
+  
   const getdata = async () => {
     const categoryData = [];
     const CategoryDetail = await firestore()
