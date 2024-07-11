@@ -2,8 +2,8 @@ import { View, Text } from 'react-native'
 import { NavigationContainer } from '@react-navigation/native';
 import 'react-native-gesture-handler';
 import React from 'react'
-import Category from './App/Drawers/Drawers';
-import Drawers from './App/Drawers/Drawers';
+import Category from './App/Navigator/Drawers/Drawers';
+import Drawers from './App/Navigator/Drawers/Drawers';
 import { configurestore } from './App/redux/store';
 import Counter from './App/Counter/Counter';
 import { Provider } from 'react-redux';

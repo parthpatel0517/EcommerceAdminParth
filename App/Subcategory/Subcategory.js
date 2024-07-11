@@ -6,6 +6,9 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { object, string, number, date, InferType } from 'yup';
 import { useFormik } from 'formik';
 import firestore from '@react-native-firebase/firestore';
+import { useDispatch, useSelector } from 'react-redux';
+import { getcategorydata } from '../redux/action/categoryfire.action';
+import { deletesubcategory, getcategorysssdata, updatesubcategory } from '../redux/action/subcategory.action';
 
 export default function Subcategory() {
   const [modalVisible, setModalVisible] = useState(false);
@@ -19,25 +22,18 @@ export default function Subcategory() {
   const [value, setValue] = useState(null);
   const [items, setItems] = useState([]);
 
-  useEffect(() => {
-    getdata()
-  }, [])
-  
-  const getdata = async () => {
-    const categoryData = [];
-    const CategoryDetail = await firestore()
-      .collection('Category')
-      .get()
-      .then(querySnapshot => {
-        console.log('Total Category: ', querySnapshot.size);
+  const dispatch = useDispatch();
+  const categorya = useSelector(state => state.category);
 
-        querySnapshot.forEach(documentSnapshot => {
-          categoryData.push({ id: documentSnapshot.id, ...documentSnapshot.data() });
-        });
-      });
-      SetCategoryData(categoryData)
+  useEffect(() => {
+    dispatch(getcategorydata());
+    getdata();
+  }, []);
+
+  const getdata = async () => {
+    SetCategoryData(categorya.categoryfire);
     const subCategoryData = [];
-    const subCategoryDetail = await firestore()
+    await firestore()
       .collection('SubCategory')
       .get()
       .then(querySnapshot => {
@@ -45,50 +41,27 @@ export default function Subcategory() {
           subCategoryData.push({ id: documentSnapshot.id, ...documentSnapshot.data() });
         });
       });
-
-    // const cat_id = categoryData.find((v) => v.id == value.id).name
-    // setdata(categoryData);`
     setdata(subCategoryData);
-    setItems(categoryData.map(v => ({ label: v.name, value: v.id })));
 
-
-  }
+    // setItems();
+  };
 
   const handalSumbit = async (data) => {
-
     if (update) {
-
-      await firestore()
-        .collection('SubCategory')
-        .doc(update)
-        .set(data)
-        .then(() => {
-          console.log('SubCategory Update!');
-        })
+      dispatch(updatesubcategory(data))
     } else {
-      await firestore()
-        .collection('SubCategory')
-        .add(data)
-        .then(() => {
-          console.log('SubCategory added!');
-        })
-        .catch((errors) => console.log(errors))
+      dispatch(getcategorysssdata(data));
     }
-    getdata();
-  }
+    setUpdate(null)
+  };
+
   const handaldelte = async (id) => {
-    await firestore()
-      .collection('SubCategory')
-      .doc(id)
-      .delete()
-      .then(() => {
-        console.log('User deleted!');
-      });
+ dispatch(deletesubcategory(id))
     getdata();
-  }
+  };
 
   let userSchema = object({
-    name: string().required().matches(/^[a-zA-Z ]+$/, "Please enter valid name"),
+    name: string().required().matches(/^[a-zA-Z ]+$/, "Please enter a valid name"),
     category_id: string().required('Please select category')
   });
 
@@ -99,21 +72,19 @@ export default function Subcategory() {
     },
     validationSchema: userSchema,
     onSubmit: (values, { resetForm }) => {
-      handalSumbit(values)
+      handalSumbit(values);
       resetForm();
-      setModalVisible(!modalVisible)
+      setModalVisible(!modalVisible);
     },
   });
 
-
-  const { handleChange, errors, values, handleSubmit, handleBlur, touched, setValues, setFieldValue } = formik
+  const { handleChange, errors, values, handleSubmit, handleBlur, touched, setValues, setFieldValue } = formik;
 
   const handaledit = async (data) => {
-    setModalVisible(true)
-    setValues(data)
-    setUpdate(data.id)
-  }
-
+    setModalVisible(true);
+    setValues(data);
+    setUpdate(data.id);
+  };
   console.log(categoryData);
 
   return (
@@ -139,7 +110,7 @@ export default function Subcategory() {
               <DropDownPicker
                 open={open}
                 value={value}
-                items={items}
+                items={categorya.categoryfire.map(v => ({ label: v.name, value: v.id }))}
                 setOpen={setOpen}
                 setValue={setValue}
                 setItems={setItems}
@@ -193,11 +164,11 @@ export default function Subcategory() {
 
 
       <View style={styles.SumbitView}>
-      {data.map((v, i) => (
+        {data.map((v, i) => (
           <View style={styles.TextSView}>
             <View style={styles.maleTextView}>
               <Text style={styles.maleText}>{v.name}</Text>
-              <Text style={styles.maleText}>{categoryData.find((v1)=>v.category_id === v1.id)?.name}</Text>
+              <Text style={styles.maleText}>{categoryData.find((v1) => v.category_id === v1.id)?.name}</Text>
             </View>
             <TouchableOpacity onPress={() => handaldelte(v.id)} style={styles.deleteEditView}>
               <MaterialIcons name="delete" size={32} color="red" paddingLeft={9} marginTop={5} />
@@ -206,7 +177,7 @@ export default function Subcategory() {
               <MaterialIcons name="edit" size={32} color="blue" paddingLeft={10} marginTop={5} />
             </TouchableOpacity>
           </View>
-      ))}
+        ))}
 
       </View>
 

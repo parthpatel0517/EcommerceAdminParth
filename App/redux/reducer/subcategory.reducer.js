@@ -1,4 +1,4 @@
-import { GET_CATEGORYDATA } from "../ActionType";
+import { DELETE_SUBCATEGORYDATA, GET_CATEGORYDATA, UPDATE_SUBCATEGORYDATA } from "../ActionType";
 
 
 const initialState = {
@@ -17,6 +17,24 @@ export const subcategoryReducer = (state = initialState, action) => {
                 subcategoryfire: action.payload,
                 error: null
             }
+            case DELETE_SUBCATEGORYDATA:
+                return {
+                    isLoading: false,
+                    subcategoryfire: state.subcategoryfire.filter((v) => v.id !== action.payload),
+                    error: null
+                }
+                case UPDATE_SUBCATEGORYDATA:
+                    return {
+                        isLoading: false,
+                        subcategoryfire: state.subcategoryfire.map((v) => {
+                            if (v.id === action.payload.id) {
+                                return action.payload
+                            } else {
+                                return v;
+                            }
+                        }),
+                        error: null
+                    }
         default:
             return state
     }
