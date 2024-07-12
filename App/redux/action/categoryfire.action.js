@@ -56,14 +56,14 @@ export const deletecategory = (id) => async (dispatch) => {
 }
 export const updatecategory = (data) => async (dispatch) => {
     try {
-        const temp = {...data}
+        const temp = { ...data }
         delete temp.id
         firestore()
             .collection('Category')
             .doc(data.id)
             .update(temp)
             .then((doc) => {
-                dispatch({type:UPDATE_CATEGORY,payload:data})
+                dispatch({ type: UPDATE_CATEGORY, payload: data })
             });
     } catch (error) {
         console.log(error);

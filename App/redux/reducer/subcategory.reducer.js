@@ -1,4 +1,4 @@
-import { DELETE_SUBCATEGORYDATA, GET_CATEGORYDATA, UPDATE_SUBCATEGORYDATA } from "../ActionType";
+import { ADD_SUBCATEGORYDATA, DELETE_SUBCATEGORYDATA, GET_SUBCATEGORYDATA, UPDATE_SUBCATEGORYDATA } from "../ActionType";
 
 
 const initialState = {
@@ -8,13 +8,19 @@ const initialState = {
 }
 
 export const subcategoryReducer = (state = initialState, action) => {
-    console.log(action);
+    console.log("sjsjjsjjsjjsj",action);
 
     switch (action.type) {
-        case GET_CATEGORYDATA:
+        case GET_SUBCATEGORYDATA:
             return {
                 isLoading: false,
                 subcategoryfire: action.payload,
+                error: null
+            }
+        case ADD_SUBCATEGORYDATA:
+            return {
+                isLoading: false,
+                subcategoryfire: state.subcategoryfire.concat(action.payload),
                 error: null
             }
             case DELETE_SUBCATEGORYDATA:

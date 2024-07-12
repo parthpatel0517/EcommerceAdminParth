@@ -8,7 +8,7 @@ import { useFormik } from 'formik';
 import firestore from '@react-native-firebase/firestore';
 import { useDispatch, useSelector } from 'react-redux';
 import { getcategorydata } from '../redux/action/categoryfire.action';
-import { deletesubcategory, getcategorysssdata, updatesubcategory } from '../redux/action/subcategory.action';
+import { addsubcategorysdata, deletesubcategory, getcategorysssdata, getsubcategorydata, updatesubcategory } from '../redux/action/subcategory.action';
 
 export default function Subcategory() {
   const [modalVisible, setModalVisible] = useState(false);
@@ -22,41 +22,38 @@ export default function Subcategory() {
   const [value, setValue] = useState(null);
   const [items, setItems] = useState([]);
 
-  const dispatch = useDispatch();
-  const categorya = useSelector(state => state.category);
+
 
   useEffect(() => {
     dispatch(getcategorydata());
     getdata();
   }, []);
-
+  const dispatch = useDispatch();
+  const categorya = useSelector(state => state.category);
+  const subcategorya = useSelector(state => state.subcategory)
+  console.log("pppapappaappapapapapappapapaap", subcategorya);
   const getdata = async () => {
     SetCategoryData(categorya.categoryfire);
-    const subCategoryData = [];
-    await firestore()
-      .collection('SubCategory')
-      .get()
-      .then(querySnapshot => {
-        querySnapshot.forEach(documentSnapshot => {
-          subCategoryData.push({ id: documentSnapshot.id, ...documentSnapshot.data() });
-        });
-      });
-    setdata(subCategoryData);
+    dispatch(getsubcategorydata())
+    // setdata(subCategoryData);
 
     // setItems();
   };
 
   const handalSumbit = async (data) => {
+    setModalVisible(false)
     if (update) {
       dispatch(updatesubcategory(data))
     } else {
-      dispatch(getcategorysssdata(data));
+      // console.log("skkxkxkxkkkkdkkdkdkx",data);
+      dispatch(addsubcategorysdata(data));
     }
     setUpdate(null)
+    getdata();
   };
 
   const handaldelte = async (id) => {
- dispatch(deletesubcategory(id))
+    dispatch(deletesubcategory(id))
     getdata();
   };
 
@@ -164,11 +161,11 @@ export default function Subcategory() {
 
 
       <View style={styles.SumbitView}>
-        {data.map((v, i) => (
+        {subcategorya.subcategoryfire.map((v, i) => (
           <View style={styles.TextSView}>
             <View style={styles.maleTextView}>
               <Text style={styles.maleText}>{v.name}</Text>
-              <Text style={styles.maleText}>{categoryData.find((v1) => v.category_id === v1.id)?.name}</Text>
+              <Text style={styles.maleText}>{categorya.categoryfire.find((v1) => v.category_id === v1.id)?.name}</Text>
             </View>
             <TouchableOpacity onPress={() => handaldelte(v.id)} style={styles.deleteEditView}>
               <MaterialIcons name="delete" size={32} color="red" paddingLeft={9} marginTop={5} />
