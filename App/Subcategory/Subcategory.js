@@ -32,6 +32,7 @@ export default function Subcategory() {
   const categorya = useSelector(state => state.category);
   const subcategorya = useSelector(state => state.subcategory)
   console.log("pppapappaappapapapapappapapaap", subcategorya);
+  
   const getdata = async () => {
     SetCategoryData(categorya.categoryfire);
     dispatch(getsubcategorydata())
@@ -106,7 +107,7 @@ export default function Subcategory() {
               }}>
               <DropDownPicker
                 open={open}
-                value={value}
+                value={formik.values.category_id}
                 items={categorya.categoryfire.map(v => ({ label: v.name, value: v.id }))}
                 setOpen={setOpen}
                 setValue={setValue}

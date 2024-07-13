@@ -6,12 +6,15 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { number, object, string } from 'yup';
 import { useFormik } from 'formik';
 import firestore from '@react-native-firebase/firestore';
+import { useDispatch, useSelector } from 'react-redux';
+import { getsubcategorydata } from '../redux/action/subcategory.action';
+import { getcategorydata } from '../redux/action/categoryfire.action';
 
 export default function Product() {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectCatedrop, setSelectCatedrop] = useState('')
   const [products, setProducts] = useState([]);
-  const [update , setUpdate] =useState([])
+  const [update, setUpdate] = useState([])
   // const [selectSubdropown, setSelectSubdrop] = useState('')
 
   // const [categoryData, SetCategoryData] = useState([]);
@@ -29,75 +32,81 @@ export default function Product() {
 
 
   useEffect(() => {
+    dispatch(getcategorydata())
+    dispatch(getsubcategorydata())
     getdata()
     Products()
+    getSubData()
+
   }, [])
+  const dispatch = useDispatch();
+  const categorya = useSelector(state => state.category);
+  const subcategorya = useSelector(state => state.subcategory)
+  console.log("pppapappaappapapapapappapapaap", subcategorya);
 
-  const getdata = async () => {
-    const categoryData = [];
-    const sub = await firestore()
-      .collection('Category')
-      .get()
-      .then(querySnapshot => {
-        console.log('Total Category: ', querySnapshot.size);
+  const getdata = async (id) => {
+    // const categoryData = [];
+    // const sub = await firestore()
+    //   .collection('Category')
+    //   .get()
+    //   .then(querySnapshot => {
+    //     console.log('Total Category: ', querySnapshot.size);
 
-        querySnapshot.forEach(documentSnapshot => {
-          categoryData.push({ id: documentSnapshot.id, ...documentSnapshot.data() });
-        });
-      });
-    // SetCategoryData(categoryData)
+    //     querySnapshot.forEach(documentSnapshot => {
+    //       categoryData.push({ id: documentSnapshot.id, ...documentSnapshot.data() });
+    //     });
+    //   });
+    // // SetCategoryData(categoryData)
 
-    setdata(categoryData)
-    setItems(categoryData.map(v => ({ label: v.name, value: v.id })));
-
+    // setdata(categoryData)
+    // setItems(categoryData.map(v => ({ label: v.name, value: v.id })));
+    // const subCategoryData = [];
+    // const isd = await firestore()
+    //   .collection('SubCategory')
+    //   .get()
+    //   .then(querySnapshot => {
+    //     querySnapshot.forEach(documentSnapshot => {
+    //       subCategoryData.push({ id: documentSnapshot.id, ...documentSnapshot.data() });
+    //     });
+    //   });
+    // const Fdata = subCategoryData.filter((v) => v.category_id === id)
+    // console.log("djsjjsjsjsjj", Fdata)
+    // setdatasub(subCategoryData);
+    // setItemse(Fdata.map(v => ({ label: v.name, value: v.id })))
   }
 
   const getSubData = async (id) => {
-    const subCategoryData = [];
-    const isd = await firestore()
-      .collection('SubCategory')
-      .get()
-      .then(querySnapshot => {
-        querySnapshot.forEach(documentSnapshot => {
-          subCategoryData.push({ id: documentSnapshot.id, ...documentSnapshot.data() });
-        });
-      });
-    const Fdata = subCategoryData.filter((v) => v.category_id === id)
+    const Fdata = subcategorya.subcategoryfire.filter((v => v.category_id === id))
     console.log("djsjjsjsjsjj", Fdata)
-    setdatasub(subCategoryData);
+    // setdatasub(subCategoryData);
     setItemse(Fdata.map(v => ({ label: v.name, value: v.id })))
   }
 
   const handalSumbit = async (data) => {
-    console.log(data);
-    if(update){
-      try {
+    console.log("ssssjsjsjssjsjjs",data);
+    if (update) {
+      console.log("llslslsllsslls",data);
         await firestore()
-        .collection('Product')
-        .doc(update)
-        .set(data)
-        .then(() => {
-          console.log('Product Update!');
-        })
-      } catch (error) {
-        console.log(error);
-      }
-     
-    } else{
-      try {
+          .collection('Product')
+          .doc(update)
+          .set(data)
+          .then(() => {
+            console.log('Product Update!');
+          })
+    } else {
+      console.log("pppspsppsspspspspspsppsp",data);
         await firestore()
-        .collection('Product')
-        .add(data)
-        .then(() => {
-          console.log('Product added!');
-          Products();
-        })
-        .catch((errors) => console.log(errors))
-      } catch (error) {
-        console.log(error);
-      }
+          .collection('Product')
+          .add(data)
+          .then(() => {
+            console.log('Product added!');
+            
+          })
+          .catch((errors) => console.log(errors))
+
     }
-   
+    setUpdate(null)
+    Product();
   }
   const Products = async () => {
     const productsData = [];
@@ -149,13 +158,13 @@ export default function Product() {
 
 
   const { handleChange, errors, values, handleSubmit, handleBlur, touched, setValues, setFieldValue } = formik
-  const handaledit= (data)=>{
+  const handaledit = (data) => {
     setModalVisible(true)
     setValues(data)
     setUpdate(data.id)
   }
   return (
-    <ScrollView>
+    <View style={styles.centeredView}>
 
       <Modal
         isVisible={modalVisible}
@@ -179,13 +188,13 @@ export default function Product() {
               <DropDownPicker
                 open={open}
                 value={value}
-                items={items}
+                items={categorya.categoryfire.map(v => ({ label: v.name, value: v.id }))}
                 setOpen={setOpen}
                 setValue={setValue}
                 setItems={setItems}
                 placeholder={'Choose Category.'}
                 onPress={() => setSelectCatedrop(!selectCatedrop)}
-                onChangeValue={() => getSubData(value)}
+                onChangeValue={() => getdata(value)}
                 onSelectItem={(items) => setFieldValue('category_id', items.value)}
               />
               <Text style={{ color: 'red', marginBottom: 3 }}>{selectCatedrop && touched.category_id ? '' : errors.category_id}</Text>
@@ -270,14 +279,14 @@ export default function Product() {
       </TouchableOpacity>
 
       <View style={styles.SumbitView}>
-      {products.map((v,i) => (
+        {products.map((v, i) => (
           <View key={i} style={styles.TextSView}>
             <View style={styles.maleTextView}>
-            <Text style={styles.maleText}>Product name: {v.Productname}</Text>
-            <Text style={styles.maleText}>Price: {v.Price}</Text>
-            <Text style={styles.maleText}>Description: {v.Description}</Text>
+              <Text style={styles.maleText}>Product name: {v.Productname}</Text>
+              <Text style={styles.maleText}>Price: {v.Price}</Text>
+              <Text style={styles.maleText}>Description: {v.Description}</Text>
             </View>
-            <TouchableOpacity onPress={() => handaldelte(v.id)}  style={styles.deleteEditView}>
+            <TouchableOpacity onPress={() => handaldelte(v.id)} style={styles.deleteEditView}>
               <MaterialIcons name="delete" size={32} color="red" paddingLeft={9} marginTop={30} />
             </TouchableOpacity>
             <TouchableOpacity onPress={() => handaledit(v)} style={styles.deleteEditView}>
@@ -287,7 +296,7 @@ export default function Product() {
         ))}
       </View>
 
-    </ScrollView>
+    </View>
   )
 }
 
@@ -374,7 +383,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 14,
     marginTop: 100,
-     paddingVertical:40,
+    paddingVertical: 40,
     backgroundColor: 'white'
   },
   TextSView: {
