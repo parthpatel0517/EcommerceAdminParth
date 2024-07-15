@@ -9,6 +9,7 @@ import firestore from '@react-native-firebase/firestore';
 import { useDispatch, useSelector } from 'react-redux';
 import { getsubcategorydata } from '../redux/action/subcategory.action';
 import { getcategorydata } from '../redux/action/categoryfire.action';
+import { addproductdata, getproductdata } from '../redux/action/product.action';
 
 export default function Product() {
   const [modalVisible, setModalVisible] = useState(false);
@@ -34,56 +35,22 @@ export default function Product() {
   useEffect(() => {
     dispatch(getcategorydata())
     dispatch(getsubcategorydata())
-    getdata()
-    Products()
-    getSubData()
+    dispatch(getproductdata())
+    // getprodata()
+    // getSubData()
+     
 
   }, [])
+
+  // console.log("ddddddddddddd", value);
   const dispatch = useDispatch();
   const categorya = useSelector(state => state.category);
   const subcategorya = useSelector(state => state.subcategory)
-  console.log("pppapappaappapapapapappapapaap", subcategorya);
-
-  const getdata = async (id) => {
-    // const categoryData = [];
-    // const sub = await firestore()
-    //   .collection('Category')
-    //   .get()
-    //   .then(querySnapshot => {
-    //     console.log('Total Category: ', querySnapshot.size);
-
-    //     querySnapshot.forEach(documentSnapshot => {
-    //       categoryData.push({ id: documentSnapshot.id, ...documentSnapshot.data() });
-    //     });
-    //   });
-    // // SetCategoryData(categoryData)
-
-    // setdata(categoryData)
-    // setItems(categoryData.map(v => ({ label: v.name, value: v.id })));
-    // const subCategoryData = [];
-    // const isd = await firestore()
-    //   .collection('SubCategory')
-    //   .get()
-    //   .then(querySnapshot => {
-    //     querySnapshot.forEach(documentSnapshot => {
-    //       subCategoryData.push({ id: documentSnapshot.id, ...documentSnapshot.data() });
-    //     });
-    //   });
-    // const Fdata = subCategoryData.filter((v) => v.category_id === id)
-    // console.log("djsjjsjsjsjj", Fdata)
-    // setdatasub(subCategoryData);
-    // setItemse(Fdata.map(v => ({ label: v.name, value: v.id })))
-  }
-
-  const getSubData = async (id) => {
-    const Fdata = subcategorya.subcategoryfire.filter((v => v.category_id === id))
-    console.log("djsjjsjsjsjj", Fdata)
-    // setdatasub(subCategoryData);
-    setItemse(Fdata.map(v => ({ label: v.name, value: v.id })))
-  }
+  const producta = useSelector(state => state.product)
+  // console.log("pppapappaappapapapapappapapaap", producta.productfire);
 
   const handalSumbit = async (data) => {
-    console.log("ssssjsjsjssjsjjs",data);
+    
     if (update) {
       console.log("llslslsllsslls",data);
         await firestore()
@@ -94,32 +61,13 @@ export default function Product() {
             console.log('Product Update!');
           })
     } else {
-      console.log("pppspsppsspspspspspsppsp",data);
-        await firestore()
-          .collection('Product')
-          .add(data)
-          .then(() => {
-            console.log('Product added!');
-            
-          })
-          .catch((errors) => console.log(errors))
-
+      console.log("ssssjsjsjssjsjjs",data);
+      dispatch(addproductdata(data))
     }
     setUpdate(null)
-    Product();
+    // Product();
+    setModalVisible(false)
   }
-  const Products = async () => {
-    const productsData = [];
-    await firestore()
-      .collection('Product')
-      .get()
-      .then(querySnapshot => {
-        querySnapshot.forEach(documentSnapshot => {
-          productsData.push({ id: documentSnapshot.id, ...documentSnapshot.data() });
-        });
-      });
-    setProducts(productsData);
-  };
   const handaldelte = async (id) => {
     console.log(id);
     await firestore()
@@ -128,9 +76,9 @@ export default function Product() {
       .delete()
       .then(() => {
         console.log('User deleted!');
-        Products();
+        // Products();
       });
-    getdata();
+    // getdata();
   }
   let userSchema = object({
     category_id: string().required('Please select category'),
@@ -194,7 +142,9 @@ export default function Product() {
                 setItems={setItems}
                 placeholder={'Choose Category.'}
                 onPress={() => setSelectCatedrop(!selectCatedrop)}
-                onChangeValue={() => getdata(value)}
+                onChangeValue={(value) => {
+                  console.log("kkkkkkkk",value);
+                }}
                 onSelectItem={(items) => setFieldValue('category_id', items.value)}
               />
               <Text style={{ color: 'red', marginBottom: 3 }}>{selectCatedrop && touched.category_id ? '' : errors.category_id}</Text>
@@ -206,11 +156,12 @@ export default function Product() {
                 position: 'relative',
                 zIndex: 999,
                 paddingHorizontal: 15,
+                color: 'black'
               }}>
               <DropDownPicker
                 open={opened}
                 value={valued}
-                items={itemse}
+                items={subcategorya.subcategoryfire.filter((v => v.category_id === value)).map(v => ({ label: v.name, value: v.id }))}
                 setOpen={setOpened}
                 setValue={setValued}
                 setItems={setItemse}
@@ -267,7 +218,7 @@ export default function Product() {
             <TouchableOpacity
               style={[styles.button, styles.buttonClose]}
               onPress={handleSubmit}>
-              <Text style={styles.textStyle}>Submit</Text>
+              <Text style={styles.textStyle}>{update ? 'update' : 'sumbit'}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -279,7 +230,7 @@ export default function Product() {
       </TouchableOpacity>
 
       <View style={styles.SumbitView}>
-        {products.map((v, i) => (
+        {producta.productfire.map((v, i) => (
           <View key={i} style={styles.TextSView}>
             <View style={styles.maleTextView}>
               <Text style={styles.maleText}>Product name: {v.Productname}</Text>
