@@ -9,13 +9,13 @@ import firestore from '@react-native-firebase/firestore';
 import { useDispatch, useSelector } from 'react-redux';
 import { getsubcategorydata } from '../redux/action/subcategory.action';
 import { getcategorydata } from '../redux/action/categoryfire.action';
-import { addproductdata, getproductdata } from '../redux/action/product.action';
+import { addproductdata, deleteproductdata, getproductdata, updateproductdata } from '../redux/action/product.action';
 
 export default function Product() {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectCatedrop, setSelectCatedrop] = useState('')
   const [products, setProducts] = useState([]);
-  const [update, setUpdate] = useState([])
+  const [update, setUpdate] = useState(null)
   // const [selectSubdropown, setSelectSubdrop] = useState('')
 
   // const [categoryData, SetCategoryData] = useState([]);
@@ -50,16 +50,10 @@ export default function Product() {
   // console.log("pppapappaappapapapapappapapaap", producta.productfire);
 
   const handalSumbit = async (data) => {
-    
+    console.log("ssssskskkskkk",update);
     if (update) {
       console.log("llslslsllsslls",data);
-        await firestore()
-          .collection('Product')
-          .doc(update)
-          .set(data)
-          .then(() => {
-            console.log('Product Update!');
-          })
+      dispatch(updateproductdata(data))
     } else {
       console.log("ssssjsjsjssjsjjs",data);
       dispatch(addproductdata(data))
@@ -70,14 +64,7 @@ export default function Product() {
   }
   const handaldelte = async (id) => {
     console.log(id);
-    await firestore()
-      .collection('Product')
-      .doc(id)
-      .delete()
-      .then(() => {
-        console.log('User deleted!');
-        // Products();
-      });
+   dispatch(deleteproductdata(id))
     // getdata();
   }
   let userSchema = object({
