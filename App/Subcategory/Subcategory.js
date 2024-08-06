@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Alert, Modal, StyleSheet, Text, Pressable, View, TouchableOpacity } from 'react-native';
-import { TextInput } from 'react-native-gesture-handler';
+import { ScrollView, TextInput } from 'react-native-gesture-handler';
 import DropDownPicker from 'react-native-dropdown-picker';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { object, string, number, date, InferType } from 'yup';
@@ -86,7 +86,7 @@ export default function Subcategory() {
   console.log(categoryData);
 
   return (
-    <View style={styles.centeredView}>
+    <ScrollView >
       <Modal
         isVisible={modalVisible}
         animationType='slide'
@@ -179,7 +179,7 @@ export default function Subcategory() {
 
       </View>
 
-    </View>
+    </ScrollView>
   )
 }
 
