@@ -8,7 +8,7 @@ const initialState = {
 }
 
 export const subcategoryReducer = (state = initialState, action) => {
-    console.log("sjsjjsjjsjjsj",action);
+    // console.log("sjsjjsjjsjjsj",action);
 
     switch (action.type) {
         case GET_SUBCATEGORYDATA:

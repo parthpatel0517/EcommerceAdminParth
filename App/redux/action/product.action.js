@@ -2,7 +2,7 @@ import { ADD_PRODUCTDATA, DELETE_PRODUCTDATA, GET_PRODUCTDATA, UPDATE_PRODUCTDAT
 import firestore from '@react-native-firebase/firestore';
 
 export const getproductdata = () => async (dispatch) => {
-  console.log("okokkkkkkkkkkkkkkkkkkkkkkkkkkkk");
+  // console.log("okokkkkkkkkkkkkkkkkkkkkkkkkkkkk");
   try {
     const productsData = [];
     await firestore()
@@ -13,7 +13,7 @@ export const getproductdata = () => async (dispatch) => {
 
           productsData.push({ id: documentSnapshot.id, ...documentSnapshot.data() });
         });
-        console.log("slslssskkkkkkkkkkkkkkkkkkk", productsData);
+        // console.log("slslssskkkkkkkkkkkkkkkkkkk", productsData);
       });
 
     dispatch({ type: GET_PRODUCTDATA, payload: productsData })
@@ -71,3 +71,4 @@ export const updateproductdata = (data) => async (dispatch) => {
     console.log(error);
   }
 }
+

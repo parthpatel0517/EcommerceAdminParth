@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Alert, Modal, StyleSheet, Text, Pressable, View, TouchableOpacity } from 'react-native';
-import { ScrollView, TextInput } from 'react-native-gesture-handler';
+import { FlatList, ScrollView, TextInput } from 'react-native-gesture-handler';
 import DropDownPicker from 'react-native-dropdown-picker';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { number, object, string } from 'yup';
 import { useFormik } from 'formik';
 import firestore from '@react-native-firebase/firestore';
@@ -12,6 +11,8 @@ import { getcategorydata } from '../redux/action/categoryfire.action';
 import { addproductdata, deleteproductdata, getproductdata, updateproductdata } from '../redux/action/product.action';
 import { getcolor } from '../redux/Slice/color.slice';
 import { getbrand } from '../redux/Slice/brand.slice';
+import ImagePicker from 'react-native-image-crop-picker';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 export default function Product() {
   const [modalVisible, setModalVisible] = useState(false);
@@ -24,6 +25,7 @@ export default function Product() {
 
   const [data, setdata] = useState([]);
   const [datasub, setdatasub] = useState([]);
+
   //Category's Dropdown
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState(null);
@@ -41,6 +43,8 @@ export default function Product() {
   const [valuebrand, setValuebrand] = useState(null);
   const [itemsbrand, setItemsebrand] = useState([]);
 
+  const [image, setImage] = useState('')
+
 
   useEffect(() => {
     dispatch(getcategorydata())
@@ -48,39 +52,30 @@ export default function Product() {
     dispatch(getproductdata())
     dispatch(getcolor())
     dispatch(getbrand())
-    // getprodata()
-    // getSubData()
-     
-
   }, [])
 
-  // console.log("ddddddddddddd", value);
+
   const dispatch = useDispatch();
   const categorya = useSelector(state => state.category);
   const subcategorya = useSelector(state => state.subcategory)
   const producta = useSelector(state => state.product);
   const brand = useSelector(state => state.brands);
   const color = useSelector(state => state.colors);
-  console.log("pppapappaappapapapapappapapaap", color.color);
 
   const handalSumbit = async (data) => {
-    // console.log("ssssskskkskkk",update);
     if (update) {
-      // console.log("llslslsllsslls",data);
       dispatch(updateproductdata(data))
     } else {
-      // console.log("ssssjsjsjssjsjjs",data);
       dispatch(addproductdata(data))
     }
     setUpdate(null)
-    // Product();
+
     setModalVisible(false)
   }
 
-
   const handaldelte = async (id) => {
-    console.log(id);
-   dispatch(deleteproductdata(id))
+    // console.log(id);
+    dispatch(deleteproductdata(id))
     // getdata();
   }
   let userSchema = object({
@@ -95,19 +90,21 @@ export default function Product() {
 
   const formik = useFormik({
     initialValues: {
-      brand_id:'',
-      brand_id:'',
+      brand_id: '',
+      brand_id: '',
       category_id: '',
       Subcategory_id: '',
       Productname: '',
       Price: '',
-      Description: ''
+      Description: '',
+      
     },
     validationSchema: userSchema,
     onSubmit: (values, { resetForm }) => {
       handalSumbit(values)
       resetForm();
       setModalVisible(!modalVisible)
+
     },
   });
 
@@ -118,8 +115,32 @@ export default function Product() {
     setValues(data)
     setUpdate(data.id)
   }
+
+  const handleCamera = () => {
+    ImagePicker.openCamera({
+      width: 300,
+      height: 400,
+      cropping: true,
+    }).then(image => {
+      setImage(image.path);
+      console.log("mkdkdsdkkdskdskdskdskdskds",image.path);
+    });
+  }
+
+  const handleGallery = () => {
+    ImagePicker.openPicker({
+      width: 300,
+      height: 400,
+      cropping: true
+    }).then(image => {
+      setImage(image.path);
+      console.log("mkdkdsdkkdskdskdskdskdskds",image.path);
+      
+    });
+  }
+
   return (
-    <ScrollView >
+    <ScrollView>
 
       <Modal
         isVisible={modalVisible}
@@ -150,7 +171,7 @@ export default function Product() {
                 placeholder={'Choose Category.'}
                 onPress={() => setSelectCatedrop(!selectCatedrop)}
                 onChangeValue={(value) => {
-                  console.log("kkkkkkkk",value);
+                  // console.log("kkkkkkkk", value);
                 }}
                 onSelectItem={(items) => setFieldValue('category_id', items.value)}
               />
@@ -161,7 +182,7 @@ export default function Product() {
                 marginTop: 30,
                 width: 250,
                 position: 'relative',
-                zIndex: 999,
+                zIndex: 1000,
                 paddingHorizontal: 15,
                 color: 'black'
               }}>
@@ -179,13 +200,12 @@ export default function Product() {
               />
               <Text style={{ color: 'red', marginBottom: 3 }}>{selectCatedrop && touched.Subcategory_id ? '' : errors.Subcategory_id}</Text>
             </View>
-
             <View
               style={{
                 marginTop: 30,
                 width: 250,
                 position: 'relative',
-                zIndex: 999,
+                zIndex: 1000,
                 paddingHorizontal: 15,
                 color: 'black'
               }}>
@@ -203,7 +223,6 @@ export default function Product() {
               />
               <Text style={{ color: 'red', marginBottom: 3 }}>{selectCatedrop && touched.color_id ? '' : errors.color_id}</Text>
             </View>
-
             <View
               style={{
                 marginTop: 30,
@@ -227,6 +246,14 @@ export default function Product() {
               />
               <Text style={{ color: 'red', marginBottom: 3 }}>{selectCatedrop && touched.brand_id ? '' : errors.brand_id}</Text>
             </View>
+
+            <TouchableOpacity style={styles.inputcamera} onPress={() => handleCamera()}>
+              <MaterialIcons name="photo-camera" size={29} color="#DB3022"  /><Text style={{ color: 'black', fontSize: 17 }}>  Camera</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.inputgallery} onPress={() => handleGallery()}>
+              <MaterialIcons name="photo-library" size={29} color="#DB3022"  /><Text style={{ color: 'black', fontSize: 17,marginLeft:10 }}>Gallery</Text>
+            </TouchableOpacity>
 
 
             <View style={{
@@ -290,8 +317,10 @@ export default function Product() {
         {producta.productfire.map((v, i) => (
           <View key={i} style={styles.TextSView}>
             <View style={styles.maleTextView}>
-            <Text style={styles.maleText}>Category : {categorya.categoryfire.find((v1) => v.category_id === v1.id)?.name}</Text>
-            <Text style={styles.maleText}>SubCategory : {subcategorya.subcategoryfire.find((v1) => v.Subcategory_id === v1.id)?.name}</Text>
+              <Text style={styles.maleText}>Category : {categorya.categoryfire.find((v1) => v.category_id === v1.id)?.name}</Text>
+              <Text style={styles.maleText}>SubCategory : {subcategorya.subcategoryfire.find((v1) => v.Subcategory_id === v1.id)?.name}</Text>
+              <Text style={styles.maleText}>Color : {color.color.find((v1) => v.color_id === v1.id)?.name}</Text>
+              <Text style={styles.maleText}>Brand : {brand.brand.find((v1) => v.brand_id === v1.id)?.name}</Text>
               <Text style={styles.maleText}>Product name: {v.Productname}</Text>
               <Text style={styles.maleText}>Price: {v.Price}</Text>
               <Text style={styles.maleText}>Description: {v.Description}</Text>
@@ -304,6 +333,14 @@ export default function Product() {
             </TouchableOpacity>
           </View>
         ))}
+
+        <View style={{ flex: 1 }} >
+          <FlatList
+            data={items}
+            renderItem={(props) => renderItem({ ...props, refRBSheet })}
+            keyExtractor={(item, index) => index.toString()}
+          />
+        </View>
       </View>
 
     </ScrollView>
@@ -320,7 +357,7 @@ const styles = StyleSheet.create({
   modalView: {
     // height: 60,
     width: 290,
-    marginTop: 60,
+    marginTop: 20,
     backgroundColor: 'white',
     borderRadius: 20,
     padding: 35,
@@ -353,6 +390,7 @@ const styles = StyleSheet.create({
     padding: 2,
     paddingHorizontal: 29,
     fontSize: 17
+
   },
   modalText: {
     marginBottom: 15,
@@ -362,23 +400,13 @@ const styles = StyleSheet.create({
     fontWeight: '500'
   },
   input: {
-    width: 210,
-    backgroundColor: '#FFFFFF',
-    marginTop: 40,
-    paddingVertical: 10,
-    marginBottom: 25,
-    paddingLeft: 10,
-    color: 'black',
+    width: "80%",
+    height: 50,
+    borderColor: 'black',
+    borderWidth: 1.3,
+    paddingHorizontal: 100,
     borderRadius: 5,
-    fontSize: 18,
-    fontWeight: '400',
-    shadowOpacity: 0.5,
-    shadowRadius: 2,
-    shadowOffset: {
-      width: 0,
-      height: 0,
-    },
-    elevation: 3,
+    marginBottom: 10
   },
   PriceInput: {
     marginTop: 10
@@ -423,7 +451,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginLeft: 13,
     fontWeight: '500',
-    marginBottom:3
+    marginBottom: 3
     //  paddingVertical:20,
   },
   deleteEditView: {
@@ -431,5 +459,130 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     width: 50,
     borderRadius: 5
+  },
+  profileView: {
+    flex: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 50,
+    position: 'relative',
+  },
+  profilecircle: {
+    width: 160,
+    height: 160,
+    borderRadius: 80,
+    borderWidth: 0,
+    backgroundColor: '#DDDFE0',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  ProfilebodyHead: {
+    flex: 0,
+    marginTop: 20
+    // justifyContent:'center',
+    // alignItems:'center'
+  },
+  Profilebody: {
+    width: '90%',
+    flexDirection: 'row',
+    // columnGap: 10,
+    margin: 15
+  },
+  cameracircle: {
+    width: 49,
+    height: 49,
+    position: 'absolute',
+    borderRadius: 50,
+    top: 106,
+    left: 240,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#DB3022',
+    elevation: 4
+  },
+  imagecircle2: {
+    width: 50,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+
+  },
+  bottomiconhead: {
+    width: '85%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginLeft: 28,
+    marginTop: 55,
+  },
+  bottomTextView: {
+    width: '90%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginLeft: 16
+  },
+  bottommini: {
+    rowGap: 10,
+    marginTop: 5,
+  },
+  bottomSheetContainer: {
+    margin: 20
+  },
+  bottomSheetText: {
+    textAlign: 'center',
+    fontSize: 20,
+    color: '#000',
+    marginTop: 5
+  },
+  bottomcover: {
+    width: '100%',
+    height: 200,
+
+  },
+  cancelText: {
+    color: '#DB3022'
+  },
+  checkbutton: {
+    width: 200,
+    backgroundColor: '#DB3022',
+    height: 50,
+    alignItems: 'center',
+    padding: 15,
+    borderRadius: 50,
+    margin: 'auto',
+    marginTop: 100
+
+  },
+  CheckText: {
+    color: 'white',
+    fontSize: 18,
+    fontFamily: 'Metropolis-Medium'
+  },
+  inputcamera: {
+    display:'flex',
+    flexDirection:'row',
+    width: "100%",
+    height: 50,
+    borderColor: 'black',
+    borderWidth: 1.3,
+    borderRadius: 5,
+    marginBottom: 50,
+    marginTop: 20,
+    color: 'black',
+    alignItems:'center',
+    justifyContent:'center'
+  },
+  inputgallery: {
+    display:'flex',
+    flexDirection:'row',
+    width: "100%",
+    height: 50,
+    borderColor: 'black',
+    borderWidth: 1.3,
+    borderRadius: 5,
+    marginBottom: 50,
+    // marginTop: 20,
+    color: 'black',
+    alignItems:'center',
+    justifyContent:'center'
   }
 });

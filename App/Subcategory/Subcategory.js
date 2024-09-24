@@ -31,7 +31,7 @@ export default function Subcategory() {
   const dispatch = useDispatch();
   const categorya = useSelector(state => state.category);
   const subcategorya = useSelector(state => state.subcategory)
-  console.log("pppapappaappapapapapappapapaap", subcategorya);
+  // console.log("pppapappaappapapapapappapapaap", subcategorya);
   
   const getdata = async () => {
     SetCategoryData(categorya.categoryfire);
@@ -83,7 +83,7 @@ export default function Subcategory() {
     setValues(data);
     setUpdate(data.id);
   };
-  console.log(categoryData);
+  // console.log(categoryData);
 
   return (
     <ScrollView >
