@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Alert, Modal, StyleSheet, Text, Pressable, View, TouchableOpacity } from 'react-native';
 import { FlatList, ScrollView, TextInput } from 'react-native-gesture-handler';
 import DropDownPicker from 'react-native-dropdown-picker';
@@ -13,8 +13,16 @@ import { getcolor } from '../redux/Slice/color.slice';
 import { getbrand } from '../redux/Slice/brand.slice';
 import ImagePicker from 'react-native-image-crop-picker';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { Image } from 'react-native-elements';
+import RBSheet from 'react-native-raw-bottom-sheet';
+import Fontisto from 'react-native-vector-icons/Fontisto';
+import Feather from 'react-native-vector-icons/Feather';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+
+const itemss = [('')]
 
 export default function Product() {
+
   const [modalVisible, setModalVisible] = useState(false);
   const [selectCatedrop, setSelectCatedrop] = useState('')
   const [products, setProducts] = useState([]);
@@ -54,6 +62,7 @@ export default function Product() {
     dispatch(getbrand())
   }, [])
 
+  const refRBSheet = useRef([]);
 
   const dispatch = useDispatch();
   const categorya = useSelector(state => state.category);
@@ -97,14 +106,14 @@ export default function Product() {
       Productname: '',
       Price: '',
       Description: '',
-      
+
     },
     validationSchema: userSchema,
     onSubmit: (values, { resetForm }) => {
-      handalSumbit(values)
-      resetForm();
+      handalSumbit({ ...values, url: image })
+      // resetForm();
       setModalVisible(!modalVisible)
-
+      resetForm();
     },
   });
 
@@ -113,6 +122,7 @@ export default function Product() {
   const handaledit = (data) => {
     setModalVisible(true)
     setValues(data)
+    setImage(data.url);
     setUpdate(data.id)
   }
 
@@ -123,7 +133,7 @@ export default function Product() {
       cropping: true,
     }).then(image => {
       setImage(image.path);
-      console.log("mkdkdsdkkdskdskdskdskdskds",image.path);
+      console.log("mkdkdsdkkdskdskdskdskdskds", image.path);
     });
   }
 
@@ -134,10 +144,58 @@ export default function Product() {
       cropping: true
     }).then(image => {
       setImage(image.path);
-      console.log("mkdkdsdkkdskdskdskdskdskds",image.path);
-      
+      console.log("mkdkdsdkkdskdskdskdskdskds", image.path);
+
     });
   }
+
+  const renderItem = ({ item, index, refRBSheet }) => {
+    return (
+      <View>
+        <RBSheet ref={ref => (refRBSheet.current[index] = ref)}>
+          <View style={styles.bottomSheetContainer}>
+            <View style={styles.bottommini}>
+
+              <View style={styles.bottomcover}>
+                <View style={{ flexDirection: 'row' }}>
+                  <View style={{ marginTop: 10, marginLeft: 10 }}>
+                    <TouchableOpacity
+                      onPress={() => refRBSheet.current[0]?.close()}
+                    ><Fontisto name="close-a" size={15} color="#A9AEB1" /></TouchableOpacity>
+                  </View>
+                  <View style={{ marginLeft: 80 }}>
+                    <Text style={styles.bottomSheetText}>Profile photo</Text>
+                  </View>
+                </View>
+
+                <View style={styles.bottomiconhead}>
+                  <View>
+                    <TouchableOpacity style={styles.imagecircle2} onPress={() => handleCamera()}>
+                      <Feather name="camera" size={24} color="#DB3022" />
+                      <View style={{ marginTop: 10 }}><Text style={{ color: 'black', fontSize: 15 }}>Camera</Text></View>
+                    </TouchableOpacity>
+                  </View>
+                  <View>
+                    <TouchableOpacity style={styles.imagecircle2} onPress={() => handleGallery()}>
+                      <MaterialCommunityIcons name="image-outline" size={24} color="#DB3022" />
+                      <View style={{ marginTop: 10 }}><Text style={{ color: 'black', fontSize: 15 }}>Gallery</Text></View>
+                    </TouchableOpacity>
+                  </View>
+                  <View>
+                    <TouchableOpacity style={styles.imagecircle2} >
+                      <Fontisto name="smiling" size={24} color="#DB3022" />
+                      <View style={{ marginTop: 10 }}><Text style={{ color: 'black', fontSize: 15 }}>Avatar</Text></View>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </View>
+            </View>
+          </View>
+        </RBSheet>
+      </View>
+      //  {item + 1}
+    );
+  };
 
   return (
     <ScrollView>
@@ -179,7 +237,7 @@ export default function Product() {
             </View>
             <View
               style={{
-                marginTop: 30,
+                marginTop: 10,
                 width: 250,
                 position: 'relative',
                 zIndex: 1000,
@@ -202,7 +260,7 @@ export default function Product() {
             </View>
             <View
               style={{
-                marginTop: 30,
+                marginTop: 10,
                 width: 250,
                 position: 'relative',
                 zIndex: 1000,
@@ -225,7 +283,7 @@ export default function Product() {
             </View>
             <View
               style={{
-                marginTop: 30,
+                marginTop: 10,
                 width: 250,
                 position: 'relative',
                 zIndex: 999,
@@ -247,14 +305,15 @@ export default function Product() {
               <Text style={{ color: 'red', marginBottom: 3 }}>{selectCatedrop && touched.brand_id ? '' : errors.brand_id}</Text>
             </View>
 
-            <TouchableOpacity style={styles.inputcamera} onPress={() => handleCamera()}>
-              <MaterialIcons name="photo-camera" size={29} color="#DB3022"  /><Text style={{ color: 'black', fontSize: 17 }}>  Camera</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.inputgallery} onPress={() => handleGallery()}>
-              <MaterialIcons name="photo-library" size={29} color="#DB3022"  /><Text style={{ color: 'black', fontSize: 17,marginLeft:10 }}>Gallery</Text>
-            </TouchableOpacity>
-
+            <View>
+              <TouchableOpacity style={styles.profilecircle} onPress={() => refRBSheet.current[0]?.open()}>
+                {image ? (
+                  <Image source={{ uri: image }} style={styles.imagecircles}/>
+                ) : (
+                  <Text style={{ color: 'black' }}>Select Image</Text>
+                )} 
+              </TouchableOpacity>
+            </View>
 
             <View style={{
               flex: 1,
@@ -317,6 +376,10 @@ export default function Product() {
         {producta.productfire.map((v, i) => (
           <View key={i} style={styles.TextSView}>
             <View style={styles.maleTextView}>
+              <Image
+                source={{ uri: v.url }}
+                style={styles.imageStyle}
+              />
               <Text style={styles.maleText}>Category : {categorya.categoryfire.find((v1) => v.category_id === v1.id)?.name}</Text>
               <Text style={styles.maleText}>SubCategory : {subcategorya.subcategoryfire.find((v1) => v.Subcategory_id === v1.id)?.name}</Text>
               <Text style={styles.maleText}>Color : {color.color.find((v1) => v.color_id === v1.id)?.name}</Text>
@@ -326,10 +389,10 @@ export default function Product() {
               <Text style={styles.maleText}>Description: {v.Description}</Text>
             </View>
             <TouchableOpacity onPress={() => handaldelte(v.id)} style={styles.deleteEditView}>
-              <MaterialIcons name="delete" size={32} color="red" paddingLeft={9} marginTop={30} />
+              <MaterialIcons name="delete" size={32} color="red" paddingLeft={9} />
             </TouchableOpacity>
             <TouchableOpacity onPress={() => handaledit(v)} style={styles.deleteEditView}>
-              <MaterialIcons name="edit" size={32} color="blue" paddingLeft={10} marginTop={30} />
+              <MaterialIcons name="edit" size={32} color="blue" paddingLeft={10} />
             </TouchableOpacity>
           </View>
         ))}
@@ -341,6 +404,13 @@ export default function Product() {
             keyExtractor={(item, index) => index.toString()}
           />
         </View>
+      </View>
+      <View style={{ flex: 1 }} >
+        <FlatList
+          data={itemss}
+          renderItem={(props) => renderItem({ ...props, refRBSheet })}
+          keyExtractor={(item, index) => index.toString()}
+        />
       </View>
 
     </ScrollView>
@@ -406,7 +476,8 @@ const styles = StyleSheet.create({
     borderWidth: 1.3,
     paddingHorizontal: 100,
     borderRadius: 5,
-    marginBottom: 10
+    marginBottom: 3,
+    color: 'black'
   },
   PriceInput: {
     marginTop: 10
@@ -458,7 +529,8 @@ const styles = StyleSheet.create({
     elevation: 5,
     backgroundColor: 'white',
     width: 50,
-    borderRadius: 5
+    borderRadius: 5,
+    justifyContent: 'center',
   },
   profileView: {
     flex: 0,
@@ -468,13 +540,15 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   profilecircle: {
-    width: 160,
-    height: 160,
-    borderRadius: 80,
-    borderWidth: 0,
-    backgroundColor: '#DDDFE0',
+    width: 150,
+    height: 150,
+    backgroundColor: 'white',
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'black',
+    marginBottom: 50,
+    borderRadius: 80,
   },
   ProfilebodyHead: {
     flex: 0,
@@ -558,31 +632,48 @@ const styles = StyleSheet.create({
     fontFamily: 'Metropolis-Medium'
   },
   inputcamera: {
-    display:'flex',
-    flexDirection:'row',
+    display: 'flex',
+    flexDirection: 'row',
     width: "100%",
     height: 50,
     borderColor: 'black',
     borderWidth: 1.3,
     borderRadius: 5,
-    marginBottom: 50,
+    marginBottom: 10,
     marginTop: 20,
     color: 'black',
-    alignItems:'center',
-    justifyContent:'center'
+    alignItems: 'center',
+    justifyContent: 'center'
   },
   inputgallery: {
-    display:'flex',
-    flexDirection:'row',
+    display: 'flex',
+    flexDirection: 'row',
     width: "100%",
     height: 50,
     borderColor: 'black',
     borderWidth: 1.3,
     borderRadius: 5,
-    marginBottom: 50,
+    marginBottom: 10,
     // marginTop: 20,
     color: 'black',
-    alignItems:'center',
-    justifyContent:'center'
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  imageStyle: {
+    width: 200,
+    height: 200,
+    marginLeft: 20,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: 'black'
+  },
+  imagecircles : {
+    width:150,
+    height:150,
+    borderRadius:80,
+    borderWidth:1,
+    borderColor:'black'
   }
 });
+
+
