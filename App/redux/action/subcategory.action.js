@@ -14,10 +14,10 @@ export const getsubcategorydata = () => async (dispatch) => {
             });
           });
 
-        console.log("actionnnnnn", subCategoryData);
+        // console.log("actionnnnnn", subCategoryData);
         dispatch({ type: GET_SUBCATEGORYDATA, payload: subCategoryData })
     } catch (error) {
-        console.log(error);
+        // console.log(error);
     }
 }
 
@@ -29,13 +29,13 @@ export const addsubcategorysdata = (data) => async (dispatch) => {
             .collection('SubCategory')
             .add(data)
             .then((doc) => {
-                console.log('SubCategory added!',doc.id);
+                // console.log('SubCategory added!',doc.id);
                 dispatch({ type: ADD_SUBCATEGORYDATA, payload:  { ...data, id: doc.id }  })
             })
             .catch((errors) => console.log(errors))
         
     } catch (error) {
-        console.log(error);
+        // console.log(error);
     }
 }
 export const deletesubcategory = (id) => async (dispatch) => {
@@ -49,7 +49,7 @@ export const deletesubcategory = (id) => async (dispatch) => {
             });
 
     } catch (error) {
-        console.log(error);
+        // console.log(error);
     }
 
 }
@@ -65,6 +65,6 @@ export const updatesubcategory = (data) => async (dispatch) => {
                 dispatch({ type: UPDATE_SUBCATEGORYDATA, payload: data })
             });
     } catch (error) {
-        console.log(error);
+        // console.log(error);
     }
 }

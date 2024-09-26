@@ -9,7 +9,7 @@ export const getcategorydata = () => async (dispatch) => {
             .collection('Category')
             .get()
             .then(querySnapshot => {
-                console.log('Total Category: ', querySnapshot.size);
+                // console.log('Total Category: ', querySnapshot.size);
 
                 querySnapshot.forEach(documentSnapshot => {
                     categoryData.push({ id: documentSnapshot.id, ...documentSnapshot.data() });
@@ -17,27 +17,29 @@ export const getcategorydata = () => async (dispatch) => {
 
             });
 
-        console.log("actionnnnnn", categoryData);
+        // console.log("actionnnnnn", categoryData);
         dispatch({ type: GET_CATEGORY, payload: categoryData })
     } catch (error) {
-        console.log(error);
+        // console.log(error);
     }
 }
 export const addcategory = (data) => async (dispatch) => {
-    console.log("lllslslslllslsllslslsllsllslslslsls", data);
+    // console.log("lllslslslllslsllslslsllsllslslslsls", data);
     try {
         await firestore()
             .collection('Category')
             .add(data)
             .then((doc) => {
-                console.log('Category addd!', doc.id);
+                // console.log('Category addd!', doc.id);
                 dispatch({ type: ADD_CATEGORY, payload: { ...data, id: doc.id } })
             })
-            .catch((errors) => console.log(errors))
+            .catch((errors) =>
+            console.log(errors)
+            )
 
 
     } catch (error) {
-        console.log(error);
+        // console.log(error);
     }
 }
 export const deletecategory = (id) => async (dispatch) => {
@@ -50,7 +52,7 @@ export const deletecategory = (id) => async (dispatch) => {
                 dispatch({ type: DELETE_CATEGORY, payload: id })
             });
     } catch (error) {
-        console.log(error);
+        // console.log(error);
     }
 
 }
@@ -66,6 +68,6 @@ export const updatecategory = (data) => async (dispatch) => {
                 dispatch({ type: UPDATE_CATEGORY, payload: data })
             });
     } catch (error) {
-        console.log(error);
+        // console.log(error);
     }
 }

@@ -8,7 +8,7 @@ export default function Counter() {
     const dispatch = useDispatch();
 
     const counter = useSelector(state => state.count)
-    console.log(counter.count);
+    // console.log(counter.count);
 
     const handalInc = () => {
         dispatch(increment());

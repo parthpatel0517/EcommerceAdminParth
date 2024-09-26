@@ -632,7 +632,7 @@ export default function Product() {
       .doc(id)
       .delete()
       .then(() => {
-        console.log('Product deleted!');
+        // console.log('Product deleted!');
         fetchProducts();
       });
   };
@@ -642,7 +642,7 @@ export default function Product() {
       .collection('Product')
       .add(data)
       .then(() => {
-        console.log('Product added!');
+        // console.log('Product added!');
         fetchProducts();
       })
       .catch(error => console.log(error));

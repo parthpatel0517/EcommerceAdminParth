@@ -61,7 +61,7 @@ export default function Categorys() {
     //  console.log(Udata);
     } else {
       if (catData) {
-        console.log("fffffff");
+        // console.log("fffffff");
         const asyncData = JSON.parse(catData);
 
         asyncData.push({ id: Math.floor(Math.random() * 10000), name: name })
@@ -91,14 +91,14 @@ export default function Categorys() {
     setdata(fData);
   }
   const handalEdit = async (id) => {
-    console.log(id);
+    // console.log(id);
 
     setModalVisible(true)
 
     const data = await AsyncStorage.getItem("category");
     const fData = JSON.parse(data).find((v) => v.id === id);
 
-    console.log(fData);
+    // console.log(fData);
 
 
     setName(fData.name);

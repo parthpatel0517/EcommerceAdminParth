@@ -21,7 +21,7 @@ export default function Color() {
     const dispatch = useDispatch()
   
     const color = useSelector(state => state.colors);
-    console.log("skskskkskskskkkkllllllllklklklk",color.color);
+    // console.log("skskskkskskskkkkllllllllklklklk",color.color);
 
     useEffect(() => {
         dispatch(getcolor())
@@ -34,7 +34,7 @@ export default function Color() {
         if (update) {
             dispatch(updatecolor(data))
         } else {
-            console.log("osososoososososoososososososos", data);
+            // console.log("osososoososososoososososososos", data);
             dispatch(addcolor(data))
         }
         setUpdate(null)
@@ -52,7 +52,7 @@ export default function Color() {
         },
         validationSchema: userSchema,
         onSubmit: (values, { resetForm }) => {
-            console.log(values);
+            // console.log(values);
             handleSubmit1(values)
             resetForm();
         },

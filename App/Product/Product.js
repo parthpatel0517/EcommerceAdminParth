@@ -77,9 +77,8 @@ export default function Product() {
     } else {
       dispatch(addproductdata(data))
     }
-    setUpdate(null)
-
     setModalVisible(false)
+    setImage(null)
   }
 
   const handaldelte = async (id) => {
@@ -99,7 +98,7 @@ export default function Product() {
 
   const formik = useFormik({
     initialValues: {
-      brand_id: '',
+      color_id: '',
       brand_id: '',
       category_id: '',
       Subcategory_id: '',
@@ -110,7 +109,18 @@ export default function Product() {
     },
     validationSchema: userSchema,
     onSubmit: (values, { resetForm }) => {
-      handalSumbit({ ...values, url: image })
+
+      let urlData = ''
+
+      if (image === '') {
+          if (producta.productfire?.url) {
+              urlData = producta.productfire?.url
+          }
+      } else {
+          urlData = image
+      }
+
+      handalSumbit({ ...values, url:  urlData })
       // resetForm();
       setModalVisible(!modalVisible)
       resetForm();
@@ -205,6 +215,7 @@ export default function Product() {
         animationType='slide'
         transparent={true}
         visible={modalVisible}
+        onRequestClose={() =>setModalVisible(false)}
       >
 
         <View style={styles.centeredView}>
@@ -547,7 +558,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: 'black',
-    marginBottom: 50,
+    marginBottom: 10,
     borderRadius: 80,
   },
   ProfilebodyHead: {

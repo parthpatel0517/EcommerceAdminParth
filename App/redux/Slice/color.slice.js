@@ -50,7 +50,7 @@ export const getcolor = createAsyncThunk(
             return getcolordata;
 
         } catch (error) {
-            console.log(error);
+            // console.log(error);
         }
     },
 )
@@ -70,7 +70,7 @@ export const Deletecolor = createAsyncThunk(
             return id;
 
         } catch (error) {
-            console.log(error);
+            // console.log(error);
         }
     },
 )

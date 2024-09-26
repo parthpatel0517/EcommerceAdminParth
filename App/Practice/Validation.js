@@ -81,7 +81,7 @@ export default function Validation() {
         validationSchema: userSchema,
 
         onSubmit: async (values) => {
-            console.log(values);
+            // console.log(values);
             setModalVisible(!modalVisible)
             const catData = await AsyncStorage.getItem("ValidationInfo");
 

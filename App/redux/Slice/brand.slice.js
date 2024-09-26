@@ -50,7 +50,7 @@ export const getbrand = createAsyncThunk(
             return getbranddata;
 
         } catch (error) {
-            console.log(error);
+            // console.log(error);
         }
     },
 )
@@ -70,7 +70,7 @@ export const Deletebrand = createAsyncThunk(
             return id;
 
         } catch (error) {
-            console.log(error);
+            // console.log(error);
         }
     },
 )

@@ -25,7 +25,7 @@ export default function CategoryFire() {
 
     const dispatch = useDispatch()
     const category = useSelector(state => state.category)
-    console.log("dkdkddkdk", category.categoryfire);
+    // console.log("dkdkddkdk", category.categoryfire);
 
 
     const getdata = async () => {
@@ -40,7 +40,7 @@ export default function CategoryFire() {
         if (update) {
             dispatch(updatecategory(data))
         } else {
-            console.log("osososoososososoososososososos", data);
+            // console.log("osososoososososoososososososos", data);
             dispatch(addcategory(data))
         }
         setUpdate(null)
@@ -57,7 +57,7 @@ export default function CategoryFire() {
         },
         validationSchema: userSchema,
         onSubmit: (values, { resetForm }) => {
-            console.log(values);
+            // console.log(values);
             handleSubmit1(values)
             resetForm();
         },

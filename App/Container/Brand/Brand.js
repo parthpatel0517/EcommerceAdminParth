@@ -22,7 +22,7 @@ export default function Brand() {
     const dispatch = useDispatch()
   
     const brand = useSelector(state => state.brands);
-    console.log("skskskkskskskkkkllllllllklklklk",brand.brand);
+    // console.log("skskskkskskskkkkllllllllklklklk",brand.brand);
 
     useEffect(() => {
         dispatch(getbrand())
@@ -40,7 +40,7 @@ export default function Brand() {
         if (update) {
             dispatch(updatebrand(data))
         } else {
-            console.log("osososoososososoososososososos", data);
+            // console.log("osososoososososoososososososos", data);
             dispatch(addbrand(data))
         }
         setUpdate(null)
@@ -58,7 +58,7 @@ export default function Brand() {
         },
         validationSchema: userSchema,
         onSubmit: (values, { resetForm }) => {
-            console.log(values);
+            // console.log(values);
             handleSubmit1(values)
             resetForm();
         },
