@@ -131,7 +131,7 @@ export const updateproductdata = (data) => async (dispatch) => {
 
       // console.log('AFAFASDFASDF', data?.imgName);
 
-      if (check === 'https') {
+      if (check === 'https:') {
         await firestore()
           .collection('Product')
           .doc(data.id)

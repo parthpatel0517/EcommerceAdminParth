@@ -79,6 +79,7 @@ export default function Product() {
     }
     setModalVisible(false)
     setImage(null)
+    setUpdate(null)
   }
 
   const handaldelte = async (id) => {
@@ -113,27 +114,31 @@ export default function Product() {
       let urlData = ''
 
       if (image === '') {
-          if (producta.productfire?.url) {
-              urlData = producta.productfire?.url
-          }
+        if (producta.productfire?.url) {
+          urlData = producta.productfire?.url
+        }
       } else {
-          urlData = image
+        urlData = image
       }
 
-      handalSumbit({ ...values, url:  urlData })
-      // resetForm();
+      handalSumbit({ ...values, url: urlData })
       setModalVisible(!modalVisible)
       resetForm();
     },
   });
 
 
-  const { handleChange, errors, values, handleSubmit, handleBlur, touched, setValues, setFieldValue } = formik
+  const { handleChange, errors, values, handleSubmit, handleBlur, touched, setValues, setFieldValue ,resetForm} = formik
   const handaledit = (data) => {
     setModalVisible(true)
     setValues(data)
     setImage(data.url);
     setUpdate(data.id)
+    setValue(data.category_id); 
+    setValued(data.Subcategory_id); 
+    setValuecolor(data.color_id); 
+    setValuebrand(data.brand_id)
+
   }
 
   const handleCamera = () => {
@@ -144,6 +149,8 @@ export default function Product() {
     }).then(image => {
       setImage(image.path);
       console.log("mkdkdsdkkdskdskdskdskdskds", image.path);
+
+      refRBSheet.current[0]?.close()
     });
   }
 
@@ -156,6 +163,7 @@ export default function Product() {
       setImage(image.path);
       console.log("mkdkdsdkkdskdskdskdskdskds", image.path);
 
+      refRBSheet.current[0]?.close()
     });
   }
 
@@ -215,7 +223,7 @@ export default function Product() {
         animationType='slide'
         transparent={true}
         visible={modalVisible}
-        onRequestClose={() =>setModalVisible(false)}
+        onRequestClose={() => {setModalVisible(false); setUpdate(null); resetForm(); setValue(''); setValued(''); setValuecolor(''); setValuebrand('') }}
       >
 
         <View style={styles.centeredView}>
@@ -223,12 +231,7 @@ export default function Product() {
             <Text style={styles.modalText}>Add Product detail</Text>
 
             <View
-              style={{
-                width: 200,
-                position: 'relative',
-                zIndex: 1000,
-                paddingHorizontal: 15,
-              }}>
+              style={[styles.categorydrop ,open ? {zIndex : 1000} : {zIndex : 1}]}>
 
               <DropDownPicker
                 open={open}
@@ -247,14 +250,7 @@ export default function Product() {
               <Text style={{ color: 'red', marginBottom: 3 }}>{selectCatedrop && touched.category_id ? '' : errors.category_id}</Text>
             </View>
             <View
-              style={{
-                marginTop: 10,
-                width: 250,
-                position: 'relative',
-                zIndex: 1000,
-                paddingHorizontal: 15,
-                color: 'black'
-              }}>
+              style={[styles.categorydrop ,opened ? {zIndex : 999} : {zIndex : 1}]}>
               <DropDownPicker
                 open={opened}
                 value={valued}
@@ -270,14 +266,7 @@ export default function Product() {
               <Text style={{ color: 'red', marginBottom: 3 }}>{selectCatedrop && touched.Subcategory_id ? '' : errors.Subcategory_id}</Text>
             </View>
             <View
-              style={{
-                marginTop: 10,
-                width: 250,
-                position: 'relative',
-                zIndex: 1000,
-                paddingHorizontal: 15,
-                color: 'black'
-              }}>
+              style={[styles.categorydrop ,openecolor ? {zIndex : 998} : {zIndex : 1}]}>
               <DropDownPicker
                 open={openecolor}
                 value={valuecolor}
@@ -293,14 +282,7 @@ export default function Product() {
               <Text style={{ color: 'red', marginBottom: 3 }}>{selectCatedrop && touched.color_id ? '' : errors.color_id}</Text>
             </View>
             <View
-              style={{
-                marginTop: 10,
-                width: 250,
-                position: 'relative',
-                zIndex: 999,
-                paddingHorizontal: 15,
-                color: 'black'
-              }}>
+              style={[styles.categorydrop ,openebrand ? {zIndex : 997} : {zIndex : 1}]}>
               <DropDownPicker
                 open={openebrand}
                 value={valuebrand}
@@ -319,10 +301,10 @@ export default function Product() {
             <View>
               <TouchableOpacity style={styles.profilecircle} onPress={() => refRBSheet.current[0]?.open()}>
                 {image ? (
-                  <Image source={{ uri: image }} style={styles.imagecircles}/>
+                  <Image source={{ uri: image }} style={styles.imagecircles} />
                 ) : (
                   <Text style={{ color: 'black' }}>Select Image</Text>
-                )} 
+                )}
               </TouchableOpacity>
             </View>
 
@@ -379,7 +361,7 @@ export default function Product() {
       </Modal>
       <TouchableOpacity
         style={[styles.button, styles.buttonOpen]}
-        onPress={() => setModalVisible(true)}>
+        onPress={() => { setModalVisible(true), setImage('') }}>
         <Text style={styles.textStyle}>Add Product detail</Text>
       </TouchableOpacity>
 
@@ -678,12 +660,17 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'black'
   },
-  imagecircles : {
-    width:150,
-    height:150,
-    borderRadius:80,
-    borderWidth:1,
-    borderColor:'black'
+  imagecircles: {
+    width: 150,
+    height: 150,
+    borderRadius: 80,
+    borderWidth: 1,
+    borderColor: 'black'
+  },
+  categorydrop: {
+    width: 200,
+    position: 'relative',
+    paddingHorizontal: 15,
   }
 });
 
