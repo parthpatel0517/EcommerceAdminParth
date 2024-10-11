@@ -9,6 +9,8 @@ import Validation from '../../Practice/Validation';
 import CategoryFire from '../../CategoryFire/CategoryFire';
 import Brand from '../../Container/Brand/Brand';
 import Color from '../../Container/Color/Color';
+import Order from '../../Order/Order';
+import { Orderstack } from '../../navigation/stacknavigator';
 
 const Drawer = createDrawerNavigator();
 
@@ -16,6 +18,7 @@ export default function Drawers() {
   return (
 
     <Drawer.Navigator>
+       <Drawer.Screen name="Orderstack" component={Orderstack} />
       <Drawer.Screen name="Product" component={Product} />
       <Drawer.Screen name="Color" component={Color} />
       <Drawer.Screen name="Brand" component={Brand} />

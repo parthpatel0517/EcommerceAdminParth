@@ -6,6 +6,7 @@ import { subcategoryReducer } from "./subcategory.reducer";
 import { productsReducer } from "./product.reducer";
 import  brandslice  from "../Slice/brand.slice";
 import colorSlice from "../Slice/color.slice";
+import orderSlice from "../Slice/order.slice";
 
 
 
@@ -16,5 +17,6 @@ export const rootReducer = combineReducers({
     subcategory : subcategoryReducer,
     product : productsReducer,
     brands : brandslice,
-    colors : colorSlice
+    colors : colorSlice,
+    order : orderSlice
 })
