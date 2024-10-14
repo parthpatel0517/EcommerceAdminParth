@@ -31,14 +31,14 @@ export const getproductdata = () => async (dispatch) => {
 }
 
 export const addproductdata = (data) => async (dispatch) => {
-  console.log("pppspsppppspaaaaaaaaaaaaaaa", data);
+  // console.log("pppspsppppspaaaaaaaaaaaaaaa", data);
   try {
     if(data.url === ""){
       await firestore()
       .collection('Product')
       .add({ ...data, url: data.url })
       .then((doc) => {
-        console.log('Product added!', doc.id);
+        // console.log('Product added!', doc.id);
         dispatch({ type: ADD_PRODUCTDATA, payload: { ...data, id: doc.id, url:data.url } })
       })
       .catch((errors) => (console.log(errors)))
@@ -60,13 +60,13 @@ export const addproductdata = (data) => async (dispatch) => {
       .collection('Product')
       .add({ ...data, url: url, imgName: fileName })
       .then((doc) => {
-        console.log('Product added!', doc.id);
+        // console.log('Product added!', doc.id);
         dispatch({ type: ADD_PRODUCTDATA, payload: { ...data, id: doc.id, url: url, imgName: fileName } })
       })
       .catch((errors) => (console.log(errors)))
 
   } catch (error) {
-    console.log(error)
+    // console.log(error)
   }
 }
 
@@ -87,11 +87,11 @@ export const deleteproductdata = (id) => async (dispatch) => {
 }
 export const updateproductdata = (data) => async (dispatch) => {
   try {
-    console.log('kkkkkkkkkkkkkkkkk', data);
+    // console.log('kkkkkkkkkkkkkkkkk', data);
 
 
     if (data.url === "") {
-      console.log("hjkhjkhjkhkl"); 
+      // console.log("hjkhjkhjkhkl"); 
 
       await firestore()
         .collection('Product')
@@ -107,7 +107,7 @@ export const updateproductdata = (data) => async (dispatch) => {
           Price: data.Price,
         })
         .then(() => {
-          console.log('User updated!');
+          // console.log('User updated!');
           dispatch({
             type: UPDATE_PRODUCTDATA,
             payload: {
@@ -127,7 +127,7 @@ export const updateproductdata = (data) => async (dispatch) => {
 
     } else {
       let check = data.url.split('/')[0];
-      console.log('checkcjffsda', check)
+      // console.log('checkcjffsda', check)
 
       // console.log('AFAFASDFASDF', data?.imgName);
 
@@ -147,7 +147,7 @@ export const updateproductdata = (data) => async (dispatch) => {
             Price: data.Price,
           })
           .then(() => {
-            console.log('User updated!');
+            // console.log('User updated!');
             dispatch({
               type: UPDATE_PRODUCTDATA,
               payload: {
@@ -166,7 +166,7 @@ export const updateproductdata = (data) => async (dispatch) => {
 
 
       } else {
-        console.log('lllllll', data);
+        // console.log('lllllll', data);
 
         if (data?.imgName) {
           const reference = await storage().ref('/Product/' + data?.imgName);
@@ -174,19 +174,19 @@ export const updateproductdata = (data) => async (dispatch) => {
         }
         const arr = data.url.split('/');
 
-        console.log(arr[arr.length - 1]);
+        // console.log(arr[arr.length - 1]);
 
         const Rno = Math.floor(Math.random() * 10000);
 
         const fileName = Rno + arr[arr.length - 1];
-        console.log('finamjaisfhasf', fileName);
+        // console.log('finamjaisfhasf', fileName);
 
         const reference = await storage().ref('/Product/' + fileName);
 
         const task = await reference.putFile(data.url);
 
         const url = await storage().ref('/Product/' + fileName).getDownloadURL();
-        console.log('urlurlrurl', url);
+        // console.log('urlurlrurl', url);
 
         await firestore()
           .collection('Product')
@@ -204,7 +204,7 @@ export const updateproductdata = (data) => async (dispatch) => {
             imgName: fileName
           })
           .then(() => {
-            console.log('User updated!');
+            // console.log('User updated!');
             dispatch({
               type: UPDATE_PRODUCTDATA,
               payload: {

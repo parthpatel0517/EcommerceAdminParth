@@ -7,6 +7,7 @@ import { productsReducer } from "./product.reducer";
 import  brandslice  from "../Slice/brand.slice";
 import colorSlice from "../Slice/color.slice";
 import orderSlice from "../Slice/order.slice";
+import productSlice from "../Slice/product.slice";
 
 
 
@@ -18,5 +19,6 @@ export const rootReducer = combineReducers({
     product : productsReducer,
     brands : brandslice,
     colors : colorSlice,
-    order : orderSlice
+    order : orderSlice,
+    product : productSlice
 })

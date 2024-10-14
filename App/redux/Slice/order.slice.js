@@ -6,6 +6,7 @@ const initialState = {
     order: [],
     error: null
 }
+
 export const ordergetData = createAsyncThunk(
     'order/ordergetData',
     async () => {
@@ -21,7 +22,7 @@ export const ordergetData = createAsyncThunk(
                    
             });
 
-       console.log("dkjndsjdjddjjdjdsj", getData);
+    //    console.log("dkjndsjdjddjjdjdsj", getData);
        return getData;
         } catch (error) {
             console.log("DCDJCDSJDCSJJDCSJDSJDS",error);
@@ -30,7 +31,53 @@ export const ordergetData = createAsyncThunk(
     }
  
 )
+export const updatestatus = createAsyncThunk(
+    'order/updatestatus',
+    async (data) => {
+        console.log("sssssowowpwpwqppqpqpqpq", data);
 
+        try {
+            const userRefrence = await firestore().collection('OrderData').doc(data.oldData.uid);
+
+            try {
+                await userRefrence.update(
+                    {
+                        Status: firebase.firestore.FieldValue.arrayRemove(
+                            data.oldData
+                        )
+                    }
+                );
+
+                await userRefrence.update(
+                    {
+                        Status: firebase.firestore.FieldValue.arrayUnion(
+                            data.newData
+                        )
+                    }
+                );
+                console.log("ksksksksssjksjsdjjdjdjdjdjkdjkdjdjkdjsdj");
+            } catch (error) {
+                console.log("dlspkxscdfjdoijhihufhfiu", error);
+            }
+
+            const getaddshipdata = [];
+            await firestore()
+                .collection('OrderData')
+                .doc(data.oldData.uid)
+                .get()
+                .then(documentSnapshot => {
+                    if (documentSnapshot.exists) {
+                        getaddshipdata.push({ id: documentSnapshot.id, ...documentSnapshot.data() })
+
+                    }
+                });
+
+            return getaddshipdata;
+        } catch (error) {
+            console.log("alallalallllskskkwowpqosks", error);
+        }
+    }
+)
 
 
 
@@ -42,6 +89,10 @@ const orderSlice = createSlice({
         builder.addCase(ordergetData.fulfilled, (state, action) => {
             state.order = action.payload;
         });
+        builder.addCase(updatestatus.fulfilled, (state, action) => {
+            state.order = action.payload;
+        });
+
     }
 });
 
