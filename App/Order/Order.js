@@ -65,12 +65,15 @@ export default function Order({navigation}) {
 
     const dispatch = useDispatch()
     const orderdetails = useSelector(state => state.order)
-  console.log("orderdetailsdbehfrjbebjfejbe",orderdetails?.order[0]?.order);
+//   console.log("orderdetailsdbehfrjbebjfejbe",orderdetails?.order[0]?.order);
 
-    useEffect(() => {
-        dispatch(ordergetData())
-
-    }, [])
+useEffect(() => {
+    const back = navigation.addListener('focus', () => {
+      dispatch(ordergetData());
+    });
+  
+    return back;
+  }, [navigation]);
 
 
     return (

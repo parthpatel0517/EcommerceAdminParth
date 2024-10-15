@@ -76,13 +76,15 @@ export default function OrderDetails({ route }) {
     { label: 'Returned', value: 'returned' },
   ]);
 
+  // const [status , setStatus] = useState(null)
+
   const a = route.params.address
   const dispatch = useDispatch()
 
   const product = useSelector(state => state.product);
   const color = useSelector(state => state.colors);
   const order = useSelector(state => state.order)
-  console.log("order",order);
+  // console.log("order",order);
   const carddata = product.order && route.params.cart ? product.order.filter((v) =>
     route.params.cart.some((v1) => v1.pid === v.id)
   ) : [];
@@ -90,9 +92,9 @@ export default function OrderDetails({ route }) {
 
   const item = carddata.length
 
-  const auth = useSelector(state => state.auth)
+  // const auth = useSelector(state => state.auth)
   useEffect(() => {
-    dispatch(ordergetData(auth?.auth?.uid))
+    // dispatch(ordergetData(auth?.auth?.uid))
     dispatch(productgetData())
     dispatch(cartgetData())
     dispatch(getcolor())
@@ -100,8 +102,10 @@ export default function OrderDetails({ route }) {
 
   const handlesumbit = (data)=>{
     console.log("dataaadddddsdssdds",data);
-
-    dispatch(updatestatus({ newData: { ...data, uid: auth.auth.uid }, oldData: route.params }))
+    if( route.params){
+      dispatch(updatestatus({ newData: data, oldData: route.params }))
+    }
+    
   }
 
   let userSchema = object({

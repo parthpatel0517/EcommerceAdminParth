@@ -13,72 +13,68 @@ export const ordergetData = createAsyncThunk(
         try {
             const getData = [];
             await firestore()
-            .collection('OrderData')
-            .get()
-            .then(querySnapshot => {
-                querySnapshot.forEach(documentSnapshot =>{
-                    getData.push({ id: documentSnapshot.id, ...documentSnapshot.data() })
-                })
-                   
-            });
+                .collection('OrderData')
+                .get()
+                .then(querySnapshot => {
+                    querySnapshot.forEach(documentSnapshot => {
+                        getData.push({ id: documentSnapshot.id, ...documentSnapshot.data() })
+                    })
 
-    //    console.log("dkjndsjdjddjjdjdsj", getData);
-       return getData;
+                });
+
+            //    console.log("dkjndsjdjddjjdjdsj", getData);
+            return getData;
         } catch (error) {
-            console.log("DCDJCDSJDCSJJDCSJDSJDS",error);
+            console.log("DCDJCDSJDCSJJDCSJDSJDS", error);
         }
-    
+
     }
- 
+
 )
 export const updatestatus = createAsyncThunk(
     'order/updatestatus',
     async (data) => {
-        console.log("sssssowowpwpwqppqpqpqpq", data);
+        console.log("sssssowowpwpwqppqpqpqpq", data.oldData.Ordernum);
 
-        try {
-            const userRefrence = await firestore().collection('OrderData').doc(data.oldData.uid);
+       
+            const userRefrence = await firestore().collection('OrderData').doc(data.oldData.address.uid);
+            const userdoc = await userRefrence.get();
+        console.log("kffkfjkjfjkjfjdfdfjfdjfdjkfdjkfjkdfjkdjfkdfjk",userdoc.data());
+            const Fdata = userdoc.data().order.map((v) => {
+                if (v.Ordernum === data.oldData.Ordernum) {
+                    return { ...v, Status: data.newData.dropdown }
+                } else {
+                    return v
+                }
+            })
 
             try {
-                await userRefrence.update(
-                    {
-                        Status: firebase.firestore.FieldValue.arrayRemove(
-                            data.oldData
-                        )
-                    }
-                );
+                await firestore()
+                    .collection('OrderData')
+                    .doc(data.oldData.address.uid)
+                    .delete()
+                    .then(() => {
+                        console.log('User deleted!');
+                    });
 
-                await userRefrence.update(
-                    {
-                        Status: firebase.firestore.FieldValue.arrayUnion(
-                            data.newData
-                        )
-                    }
-                );
-                console.log("ksksksksssjksjsdjjdjdjdjdjkdjkdjdjkdjsdj");
+                await firestore()
+                    .collection('OrderData')
+                    .doc(data.oldData.address.uid)
+                    .set({
+                        order : Fdata
+                    })
+                    .then(() => {
+                        console.log('User Add!');
+                    });
+
             } catch (error) {
-                console.log("dlspkxscdfjdoijhihufhfiu", error);
+                console.log("errorrorororor", error);
             }
 
-            const getaddshipdata = [];
-            await firestore()
-                .collection('OrderData')
-                .doc(data.oldData.uid)
-                .get()
-                .then(documentSnapshot => {
-                    if (documentSnapshot.exists) {
-                        getaddshipdata.push({ id: documentSnapshot.id, ...documentSnapshot.data() })
 
-                    }
-                });
-
-            return getaddshipdata;
-        } catch (error) {
-            console.log("alallalallllskskkwowpqosks", error);
-        }
+      
     }
 )
-
 
 
 const orderSlice = createSlice({
