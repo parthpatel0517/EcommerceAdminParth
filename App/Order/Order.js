@@ -66,7 +66,9 @@ export default function Order({navigation}) {
     const dispatch = useDispatch()
     const orderdetails = useSelector(state => state.order)
 //   console.log("orderdetailsdbehfrjbebjfejbe",orderdetails?.order[0]?.order);
+const alldata = orderdetails?.order?.flatMap((v) => v?.order || []);
 
+    console.log("alldataalldataalldata",alldata);
 useEffect(() => {
     const back = navigation.addListener('focus', () => {
       dispatch(ordergetData());
@@ -79,7 +81,7 @@ useEffect(() => {
     return (
         <ScrollView>
             <StatusBar backgroundColor="#F4F4F4" barStyle="dark-content" />
-            <View style={{ width: '100%', height: 1000, backgroundColor: '#F4F4F4' }}>
+            <View style={{ width: '100%', backgroundColor: '#F4F4F4' }}>
                 {/* <View style={Styles.mainIcon}>
           <TouchableOpacity>
             <EvilIcons name="chevron-left" size={45} color="#222222" />
@@ -105,7 +107,7 @@ useEffect(() => {
                 </View>
 
                 <FlatList
-                    data={orderdetails?.order?.[0]?.order}
+                    data={alldata}
                     renderItem={({ item }) => <DataStructure v={item} n={navigation}/>}
                     keyExtractor={item => item.id}
                 />
