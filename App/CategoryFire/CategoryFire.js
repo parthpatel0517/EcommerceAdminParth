@@ -49,11 +49,13 @@ export default function CategoryFire() {
 
     let userSchema = object({
         name: string().required(),
+        desc : string().required()
     });
 
     const formik = useFormik({
         initialValues: {
-            name: ''
+            name: '',
+            desc:''
         },
         validationSchema: userSchema,
         onSubmit: (values, { resetForm }) => {
@@ -94,6 +96,16 @@ export default function CategoryFire() {
                             value={values.name}
                         />
                         <Text style={{ color: 'red' }}>{errors.name && touched.name ? errors.name : ''}</Text>
+
+                        <TextInput
+                            style={styles.input}
+                            placeholder='description Name'
+                            placeholderTextColor='#9B9B9B'
+                            onChangeText={handleChange('desc')}
+                            onBlur={handleBlur('desc')}
+                            value={values.desc}
+                        />
+                        <Text style={{ color: 'red' }}>{errors.desc && touched.desc ? errors.desc : ''}</Text>
                         <TouchableOpacity
                             style={[styles.buttonSumbit, styles.buttonClose]}
                             onPress={handleSubmit}>

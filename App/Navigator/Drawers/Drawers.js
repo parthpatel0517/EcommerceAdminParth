@@ -18,6 +18,7 @@ export default function Drawers() {
   return (
 
     <Drawer.Navigator>
+      <Drawer.Screen name="CategoryFire" component={CategoryFire} />
        <Drawer.Screen name="Orderstack" component={Orderstack} />
       <Drawer.Screen name="Product" component={Product} />
       <Drawer.Screen name="Color" component={Color} />
@@ -25,8 +26,6 @@ export default function Drawers() {
       <Drawer.Screen name="Validation" component={Validation} />
       <Drawer.Screen name="Categorys" component={Categorys} />
       <Drawer.Screen name="Subcategory" component={Subcategory} />
-      <Drawer.Screen name="CategoryFire" component={CategoryFire} />
-
     </Drawer.Navigator>
 
   )
