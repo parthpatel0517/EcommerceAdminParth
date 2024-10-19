@@ -44,18 +44,17 @@ export default function CategoryFire() {
             dispatch(addcategory(data))
         }
         setUpdate(null)
-
     }
 
     let userSchema = object({
         name: string().required(),
-        desc : string().required()
+        description : string().required()
     });
 
     const formik = useFormik({
         initialValues: {
             name: '',
-            desc:''
+            description:''
         },
         validationSchema: userSchema,
         onSubmit: (values, { resetForm }) => {
@@ -65,6 +64,7 @@ export default function CategoryFire() {
         },
     });
     const handaldelte = async (id) => {
+        console.log("hjhhghggh",id);
         dispatch(deletecategory(id))
         getdata();
     }
@@ -72,9 +72,10 @@ export default function CategoryFire() {
     const { handleChange, errors, values, handleSubmit, handleBlur, touched, setValues } = formik
 
     const handalEdit = async (data) => {
+        console.log("xkkjksjdkjdskjdskjdskjsdd",data);
         setModalVisible(true)
         setValues(data)
-        setUpdate(data.id)
+        setUpdate(data._id)
     }
     return (
         <ScrollView>
@@ -99,17 +100,17 @@ export default function CategoryFire() {
 
                         <TextInput
                             style={styles.input}
-                            placeholder='description Name'
+                            placeholder='descriptionription Name'
                             placeholderTextColor='#9B9B9B'
-                            onChangeText={handleChange('desc')}
-                            onBlur={handleBlur('desc')}
-                            value={values.desc}
+                            onChangeText={handleChange('description')}
+                            onBlur={handleBlur('description')}
+                            value={values.description}
                         />
-                        <Text style={{ color: 'red' }}>{errors.desc && touched.desc ? errors.desc : ''}</Text>
+                        <Text style={{ color: 'red' }}>{errors.description && touched.description ? errors.description : ''}</Text>
                         <TouchableOpacity
                             style={[styles.buttonSumbit, styles.buttonClose]}
                             onPress={handleSubmit}>
-                            <Text style={styles.textStyle}>{update ? 'update' : 'Sumbit'}</Text>
+                            <Text style={styles.textStyle}>{update ? 'Update' : 'Sumbit'}</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -127,7 +128,7 @@ export default function CategoryFire() {
                             <Text style={styles.maleText}>{v.name}</Text>
                         </View>
 
-                        <TouchableOpacity onPress={() => handaldelte(v.id)} style={styles.deleteEditView}>
+                        <TouchableOpacity onPress={() => handaldelte(v._id)} style={styles.deleteEditView}>
                             <MaterialIcons name="delete" size={33} color="red" paddingLeft={8} marginTop={7} />
                         </TouchableOpacity>
 

@@ -26,14 +26,14 @@ export const categoryReducer = (state = initialState, action) => {
         case DELETE_CATEGORY:
             return {
                 isLoading: false,
-                categoryfire: state.categoryfire.filter((v) => v.id !== action.payload),
+                categoryfire: state.categoryfire.filter((v) => v._id !== action.payload),
                 error: null
             }
         case UPDATE_CATEGORY:
             return {
                 isLoading: false,
                 categoryfire: state.categoryfire.map((v) => {
-                    if (v.id === action.payload.id) {
+                    if (v._id === action.payload._id) {
                         return action.payload
                     } else {
                         return v;
