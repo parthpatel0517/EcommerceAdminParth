@@ -1,20 +1,29 @@
 import { View, Text, TouchableOpacity } from 'react-native'
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { increment } from '@react-native-firebase/firestore';
+import { CounterContext } from '../context/CounterContext';
 
 
 export default function Counter() {
-    const dispatch = useDispatch();
+    // const dispatch = useDispatch();
 
-    const counter = useSelector(state => state.count)
-    // console.log(counter.count);
+    // const counter = useSelector(state => state.count)
+    // // console.log(counter.count);
 
+    // const handalInc = () => {
+    //     dispatch(increment());
+    // }
+    // const handalDec = () => {
+    //     dispatch(decrement());
+    // }
+    const co = useContext(CounterContext)
     const handalInc = () => {
-        dispatch(increment());
+        co.increment(co.count)
     }
+
     const handalDec = () => {
-        dispatch(decrement());
+        co.decrement(co.count)
     }
 
     return (
@@ -26,7 +35,7 @@ export default function Counter() {
                 <Text>+</Text>
             </TouchableOpacity>
 
-            <Text>{counter.count}</Text>
+            <Text>{co.count}</Text>
 
             <TouchableOpacity onPress={handalDec}>
                 <Text>-</Text>

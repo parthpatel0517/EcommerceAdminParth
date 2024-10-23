@@ -7,18 +7,21 @@ import Drawers from './App/Navigator/Drawers/Drawers';
 import { configurestore } from './App/redux/store';
 import Counter from './App/Counter/Counter';
 import { Provider } from 'react-redux';
+import { CounterProvider } from './App/context/CounterContext';
 
 
 
 export default function App() {
   const store = configurestore()
   return (
+    <CounterProvider>
     <Provider store={store}>
-    <NavigationContainer>
+    {/* <NavigationContainer>
         <Drawers></Drawers>
-    </NavigationContainer>
-    {/* <Counter></Counter> */}
+    </NavigationContainer> */}
+    <Counter></Counter>
     </Provider>
+    </CounterProvider>
   
    
   )
